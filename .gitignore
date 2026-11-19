@@ -1,3 +1,4 @@
 *.exe
 .omo/
 .playwright-mcp/
+connector-ioc-feed
