@@ -1,9 +1,3 @@
-# Go
 *.exe
-*.test
-/vendor/
-go.work.sum
-
-# Build artifacts
-dist/
-bin/
+.omo/
+.playwright-mcp/

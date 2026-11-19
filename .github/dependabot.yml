@@ -1,0 +1,98 @@
+# Dependabot version updates. Security updates (alerts → PRs) are configured in
+# repository settings and also honour these directories and groups.
+#
+# Every connector is its own Go module with its own copy of the SDK's
+# dependencies, so one golang.org/x/net release touches seventeen go.mod files.
+# `group-by: dependency-name` folds those into one pull request per dependency
+# instead of one per directory. The directory lists are explicit rather than
+# globbed so a new connector is added on purpose, next to its go.work entry.
+#
+# The repo root is deliberately not listed. It holds go.work, and Dependabot
+# treats a directory with go.work as the whole workspace: its PRs re-synced
+# every module's indirect versions and added unrelated requirements to the root
+# go.mod. Every image builds with GOWORK=off from its own module, so the
+# per-module directories below are what ships. The root module only carries
+# the manifest scripts.
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directories:
+      - /sdk
+      - /ports_scanner/nmap
+      - /ports_scanner/rustscan
+      - /sca/trivy
+      - /secrets/gitleaks
+      - /url_discovery/arjun
+      - /url_discovery/dirsearch
+      - /url_discovery/ffuf
+      - /url_discovery/gau
+      - /url_discovery/katana
+      - /vulnerabilities/acunetix
+      - /vulnerabilities/nessus
+      - /vulnerabilities/nikto
+      - /vulnerabilities/nuclei
+      - /vulnerabilities/wpscan
+      - /vulnerabilities/zap
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "chore(deps)"
+    # The nuclei connector imports hmap and httpx next to the nuclei library,
+    # and they must stay on the versions that nuclei release builds against:
+    # hmap 0.0.104 alone pulls a zcrypto that breaks nuclei's tlsx. They move
+    # when github.com/projectdiscovery/nuclei/v3 moves.
+    ignore:
+      - dependency-name: github.com/projectdiscovery/hmap
+      - dependency-name: github.com/projectdiscovery/httpx
+    groups:
+      go-modules:
+        patterns: ["*"]
+        group-by: dependency-name
+
+  # Base and builder image tags. Upstream tool images (zap-stable, wpscan,
+  # gitleaks, trivy, nikto) are pinned deliberately and each Dockerfile notes
+  # what else has to move with the tag — read that note before merging.
+  #
+  # nmap comes from the alpine package set, so for /ports_scanner/nmap the
+  # alpine tag *is* the nmap version: an alpine bump must also move version and
+  # image in ports_scanner/nmap/manifest.yaml and the Dockerfile's nmap note.
+  - package-ecosystem: docker
+    directories:
+      - /ports_scanner/nmap
+      - /ports_scanner/rustscan
+      - /sca/trivy
+      - /secrets/gitleaks
+      - /url_discovery/arjun
+      - /url_discovery/dirsearch
+      - /url_discovery/ffuf
+      - /url_discovery/gau
+      - /url_discovery/katana
+      - /vulnerabilities/acunetix
+      - /vulnerabilities/nessus
+      - /vulnerabilities/nikto
+      - /vulnerabilities/nuclei
+      - /vulnerabilities/wpscan
+      - /vulnerabilities/zap
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "chore(images)"
+    groups:
+      docker-images:
+        patterns: ["*"]
+        group-by: dependency-name
+
+  # scan-and-push.yml pins actions to commit SHAs with a `# vX.Y.Z` comment;
+  # Dependabot updates both. The other workflows use major tags.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      github-actions:
+        patterns: ["*"]
