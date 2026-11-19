@@ -119,7 +119,7 @@ func Clone(ctx context.Context, in Inputs, opts Options) (*Checkout, error) {
 		gitBin = "git"
 	}
 
-	dir, err := os.MkdirTemp(opts.TempDir, "oasm-repo-")
+	dir, err := os.MkdirTemp(opts.TempDir, "mithril-repo-")
 	if err != nil {
 		return nil, fmt.Errorf("create checkout dir: %w", err)
 	}
