@@ -1,7 +1,6 @@
 go 1.26.0
 
 use (
-	./sdk
 	./cti/brand-protection
 	./cti/crypto
 	./cti/darkweb
@@ -9,10 +8,11 @@ use (
 	./cti/ioc-feed
 	./cti/social-monitor
 	./cti/supplier-risk
-	./sast/semgrep
 	./ports_scanner/nmap
 	./ports_scanner/rustscan
+	./sast/semgrep
 	./sca/trivy
+	./sdk
 	./secrets/gitleaks
 	./url_discovery/arjun
 	./url_discovery/dirsearch
