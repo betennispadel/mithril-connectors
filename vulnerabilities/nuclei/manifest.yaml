@@ -2,12 +2,12 @@
 name: Nuclei
 slug: nuclei
 version: 3.11.1
-image: ghcr.io/oasm-platform/connector-nuclei:3.11.1
+image: ghcr.io/betennispadel/connector-nuclei:3.11.1
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://projectdiscovery.io'
-repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
-supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+repositoryUrl: 'https://github.com/betennispadel/mithril-connectors'
+supportUrl: 'https://github.com/betennispadel/mithril-connectors/issues'
 shortDescription: 'Fast template-based vulnerability scanner'
 description: 'Runs ProjectDiscovery Nuclei template-based scans against a target URL to detect known vulnerabilities, misconfigurations, and exposed secrets.'
 capabilities:

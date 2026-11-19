@@ -1,12 +1,12 @@
 name: Acunetix
 slug: acunetix
 version: 0.1.0
-image: ghcr.io/oasm-platform/connector-acunetix:0.1.0
+image: ghcr.io/betennispadel/connector-acunetix:0.1.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://www.acunetix.com'
-repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
-supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+repositoryUrl: 'https://github.com/betennispadel/mithril-connectors'
+supportUrl: 'https://github.com/betennispadel/mithril-connectors/issues'
 shortDescription: 'Acunetix web vulnerability scanner'
 description: 'Connects to an Acunetix instance, runs a scan against a target, and streams the discovered vulnerabilities back to the Worker.'
 capabilities:

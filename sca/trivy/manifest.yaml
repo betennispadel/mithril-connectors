@@ -2,12 +2,12 @@
 name: Trivy - Dependency & IaC Scanner
 slug: trivy
 version: 0.76.2
-image: ghcr.io/oasm-platform/connector-trivy:0.76.2
+image: ghcr.io/betennispadel/connector-trivy:0.76.2
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://trivy.dev'
-repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
-supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+repositoryUrl: 'https://github.com/betennispadel/mithril-connectors'
+supportUrl: 'https://github.com/betennispadel/mithril-connectors/issues'
 shortDescription: 'Finds vulnerable dependencies and IaC misconfigurations in Git repositories'
 description: 'Scans the repositories of a Git organization with Aqua Security Trivy. Reports known vulnerabilities (CVE, GHSA) in the dependencies declared by lockfiles and manifests — npm, pip, Go, Maven, Cargo, Composer, NuGet, RubyGems and more — with the installed and fixed versions, and misconfigurations in Dockerfiles, Kubernetes manifests, Helm charts and Terraform. Secret scanning can be turned on in the profile; secret values are never reported.'
 capabilities:

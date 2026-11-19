@@ -1,12 +1,12 @@
 name: WPScan - WordPress Security Scanner
 slug: wpscan
 version: 4.2.0
-image: ghcr.io/oasm-platform/connector-wpscan:4.2.0
+image: ghcr.io/betennispadel/connector-wpscan:4.2.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://wpscan.com'
-repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
-supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+repositoryUrl: 'https://github.com/betennispadel/mithril-connectors'
+supportUrl: 'https://github.com/betennispadel/mithril-connectors/issues'
 shortDescription: 'WordPress vulnerability scanner'
 description: 'Scans WordPress sites using WPScan to enumerate vulnerable plugins and themes, detect known CVEs, misconfigurations, and weak credentials.'
 capabilities:

@@ -1,12 +1,12 @@
 name: dirsearch - Web Path Scanner
 slug: dirsearch
 version: 0.5.0
-image: ghcr.io/oasm-platform/connector-dirsearch:0.5.0
+image: ghcr.io/betennispadel/connector-dirsearch:0.5.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://github.com/maurosoria/dirsearch'
-repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
-supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+repositoryUrl: 'https://github.com/betennispadel/mithril-connectors'
+supportUrl: 'https://github.com/betennispadel/mithril-connectors/issues'
 shortDescription: 'Brute-force web path and file discovery'
 description: 'Discovers hidden files, directories and endpoints on a web target by brute-forcing paths from a wordlist with dirsearch, filtering by status code and file extension.'
 capabilities:

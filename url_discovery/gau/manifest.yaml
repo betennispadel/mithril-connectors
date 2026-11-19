@@ -1,12 +1,12 @@
 name: Gau - GetAllUrls
 slug: gau
 version: 2.2.4
-image: ghcr.io/oasm-platform/connector-gau:2.2.4
+image: ghcr.io/betennispadel/connector-gau:2.2.4
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://github.com/lc/gau'
-repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
-supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+repositoryUrl: 'https://github.com/betennispadel/mithril-connectors'
+supportUrl: 'https://github.com/betennispadel/mithril-connectors/issues'
 shortDescription: 'Historical URL discovery via public archives'
 description: 'Discovers historical/archived URLs for a domain using Gau (GetAllUrls) across Wayback Machine, Common Crawl, AlienVault OTX and urlscan.io.'
 capabilities:

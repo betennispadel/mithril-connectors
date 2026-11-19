@@ -1,12 +1,12 @@
 name: Katana - Web Crawler
 slug: katana
 version: 1.8.0
-image: ghcr.io/oasm-platform/connector-katana:1.8.0
+image: ghcr.io/betennispadel/connector-katana:1.8.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://github.com/projectdiscovery/katana'
-repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
-supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+repositoryUrl: 'https://github.com/betennispadel/mithril-connectors'
+supportUrl: 'https://github.com/betennispadel/mithril-connectors/issues'
 shortDescription: 'Web crawler and endpoint discovery'
 description: 'Crawls a target website with Katana (ProjectDiscovery) up to a configurable depth and streams every discovered HTTP/HTTPS URL as a finding for URL discovery.'
 capabilities:

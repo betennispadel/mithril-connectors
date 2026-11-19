@@ -1,12 +1,12 @@
 name: Nessus
 slug: nessus
 version: 0.2.0
-image: ghcr.io/oasm-platform/connector-nessus:0.2.0
+image: ghcr.io/betennispadel/connector-nessus:0.2.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://www.tenable.com'
-repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
-supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+repositoryUrl: 'https://github.com/betennispadel/mithril-connectors'
+supportUrl: 'https://github.com/betennispadel/mithril-connectors/issues'
 shortDescription: 'Tenable Nessus vulnerability scanner'
 description: 'Connects to a Tenable Nessus instance, creates and runs a scan against a target, and streams the discovered vulnerabilities back to the Worker as JSONL findings.'
 capabilities:

@@ -1,13 +1,13 @@
 name: Nmap
 slug: nmap
 version: 7.99
-image: ghcr.io/oasm-platform/connector-nmap:7.99
+image: ghcr.io/betennispadel/connector-nmap:7.99
 author: 'oasm'
 pricingTier: [free]
 egress: direct
 homepage: 'https://nmap.org'
-repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
-supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+repositoryUrl: 'https://github.com/betennispadel/mithril-connectors'
+supportUrl: 'https://github.com/betennispadel/mithril-connectors/issues'
 shortDescription: 'TCP/UDP port scanner and CVE detection'
 description: 'Scans a single host with Nmap (Nmap Security Scanner) and streams every open port as a finding for port scanning: one finding per protocol/port with its Nmap service name, product and version. For vulnerabilities it adds service version detection and the vulners NSE script and streams one finding per CVE matched to a detected service version. Unprivileged TCP connect scan; requires no raw sockets.'
 capabilities:

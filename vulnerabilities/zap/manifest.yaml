@@ -1,12 +1,12 @@
 name: OWASP ZAP - Web Application Scanner
 slug: zap
 version: 2.17.0
-image: ghcr.io/oasm-platform/connector-zap:2.17.0
+image: ghcr.io/betennispadel/connector-zap:2.17.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://www.zaproxy.org'
-repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
-supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+repositoryUrl: 'https://github.com/betennispadel/mithril-connectors'
+supportUrl: 'https://github.com/betennispadel/mithril-connectors/issues'
 shortDescription: 'OWASP ZAP dynamic web application scanner'
 description: 'Runs OWASP ZAP (Zed Attack Proxy) against a target web application using the Automation Framework, then streams the discovered alerts back to the Worker as normalized findings.'
 capabilities:

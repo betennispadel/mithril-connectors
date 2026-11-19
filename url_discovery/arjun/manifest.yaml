@@ -1,12 +1,12 @@
 name: Arjun - Parameter Discovery
 slug: arjun
 version: 2.2.7
-image: ghcr.io/oasm-platform/connector-arjun:2.2.7
+image: ghcr.io/betennispadel/connector-arjun:2.2.7
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://github.com/s0md3v/Arjun'
-repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
-supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+repositoryUrl: 'https://github.com/betennispadel/mithril-connectors'
+supportUrl: 'https://github.com/betennispadel/mithril-connectors/issues'
 shortDescription: 'HTTP parameter discovery'
 description: 'Discovers hidden HTTP parameters for a URL using Arjun, probing a wordlist of parameter names against the target and reporting every parameter the endpoint responds to.'
 capabilities:
