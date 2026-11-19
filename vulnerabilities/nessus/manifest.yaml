@@ -1,0 +1,74 @@
+name: Nessus
+slug: nessus
+version: 0.2.0
+image: ghcr.io/oasm-platform/connector-nessus:0.2.0
+author: 'oasm'
+pricingTier: [free]
+homepage: 'https://www.tenable.com'
+repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
+supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+shortDescription: 'Tenable Nessus vulnerability scanner'
+description: 'Connects to a Tenable Nessus instance, creates and runs a scan against a target, and streams the discovered vulnerabilities back to the Worker as JSONL findings.'
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [domain, ip, cidr]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      required: [target]
+      properties:
+        target:
+          type: string
+          format: uri
+          title: Scan target
+          description: 'Target URL or hostname to scan.'
+          examples: [https://example.com]
+          ui:placeholder: 'https://example.com'
+      additionalProperties: false
+configSchema:
+  type: object
+  required: [url, accessKey, secretKey]
+  properties:
+    url:
+      type: string
+      format: uri
+      title: Nessus URL
+      description: 'Base URL of the Nessus instance.'
+      examples: [https://nessus.local:8834]
+      ui:placeholder: 'https://nessus.local:8834'
+    accessKey:
+      type: string
+      title: API access key
+      description: 'Nessus API access key, paired with secretKey.'
+      ui:placeholder: 'Enter API access key'
+    secretKey:
+      type: string
+      title: API secret key
+      description: 'Nessus API secret key, paired with accessKey.'
+      ui:widget: password
+      ui:placeholder: 'Enter API secret key'
+    templateUuid:
+      type: string
+      title: Scan template UUID
+      description: 'UUID of the Nessus scan template to use.'
+      ui:placeholder: 'ad629e16-03b6-461c-94cf-736f3f1a1c2f'
+    policyId:
+      type: string
+      title: Policy ID
+      description: 'ID of an existing Nessus scan policy.'
+      ui:placeholder: 'e.g. 123'
+    folderId:
+      type: string
+      title: Folder ID
+      description: 'ID of the Nessus folder that will contain the scan.'
+      ui:placeholder: 'e.g. 1'
+    disableTlsChecks:
+      type: boolean
+      title: Disable TLS checks
+      description: 'Skip TLS certificate verification (only for a Nessus instance still serving its default self-signed certificate).'
+  additionalProperties: false
+resourceDefaults:
+  cpu: 500m
+  memory: 512Mi
+  timeoutSeconds: 600

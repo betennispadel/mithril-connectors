@@ -1,0 +1,385 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	httphelper "github.com/oasm-platform/oasm-connectors/sdk/http"
+	"github.com/projectdiscovery/hmap/store/hybrid"
+	"github.com/projectdiscovery/httpx/common/httpx"
+	nuclei "github.com/projectdiscovery/nuclei/v3/lib"
+	nucleiOutput "github.com/projectdiscovery/nuclei/v3/pkg/output"
+	nucleiUtils "github.com/projectdiscovery/nuclei/v3/pkg/utils"
+)
+
+// NucleiAdapter implements Validate/Execute for nuclei as a thin wrapper:
+// receive input -> exec nuclei -> stream JSONL findings back through the SDK channel.
+// Input validation is the worker node layer's responsibility, upstream of here.
+type NucleiAdapter struct{}
+
+// Config holds nuclei scan configuration parsed from the OASM_CONFIG env var.
+// Fields map to nuclei CLI flags; pointers distinguish "absent" from zero-value.
+type Config struct {
+	Severity        []string `json:"severity"`
+	Tags            []string `json:"tags"`
+	ExcludeTags     []string `json:"excludeTags"`
+	TemplateIds     []string `json:"templateIds"`
+	RateLimit       *int     `json:"rateLimit"`
+	Concurrency     *int     `json:"concurrency"`
+	FollowRedirects *bool    `json:"followRedirects"`
+	// Interactsh enables out-of-band interaction detection (SSRF/RCE/XXE via a
+	// public interactsh server). Absent → enabled, so a plain scan matches
+	// `nuclei -u <target>`; set false in air-gapped/no-egress environments.
+	Interactsh *bool `json:"interactsh"`
+	// CustomTemplates, when set, replace the baked collection: only these run.
+	CustomTemplates []CustomTemplate `json:"customTemplates"`
+}
+
+// defaultTemplateDir is where the Dockerfile bakes the template collection
+// (-ud /opt/nuclei-templates at build time). nuclei itself ignores the
+// NUCLEI_TEMPLATES_DIR env var — it honors only -t/-ud flags and its config
+// file — so the adapter must pass -t explicitly. Override per-scan via the
+// NUCLEI_TEMPLATE_DIR env var for custom layouts.
+const defaultTemplateDir = "/opt/nuclei-templates"
+
+// templateDir returns the templates directory: NUCLEI_TEMPLATE_DIR if set,
+// else NUCLEI_TEMPLATES_DIR (plural, injected by the worker runtime), else
+// the baked-in defaultTemplateDir.
+func templateDir() string {
+	if d := os.Getenv("NUCLEI_TEMPLATE_DIR"); d != "" {
+		return d
+	}
+	if d := os.Getenv("NUCLEI_TEMPLATES_DIR"); d != "" {
+		return d
+	}
+	return defaultTemplateDir
+}
+
+type params struct {
+	templates       []string
+	filters         nuclei.TemplateFilters
+	rateLimit       int
+	concurrency     int
+	followRedirects bool
+	idMode          bool
+	noInteractsh    bool
+}
+
+// scanParams maps a Config + templates directory into a params struct.
+// When TemplateIds is set, only filters.IDs is populated: severity/tags/excludeTags
+// are dropped because mixing -id with template selection filters made nuclei
+// silently match nothing. Custom templates drop every filter: the user picked
+// exactly what to run, and a profile's severity filter would silently skip it.
+// When no config is provided the manifest.yaml defaults apply: rateLimit=150,
+// concurrency=25, interactsh=enabled.
+func scanParams(cfg Config, dir string) params {
+	templates := []string{dir}
+	var filters nuclei.TemplateFilters
+	idMode := len(cfg.TemplateIds) > 0
+	if len(cfg.CustomTemplates) > 0 {
+		log.Printf("nuclei: %d custom templates — ignoring severity/tags/excludeTags/templateIds", len(cfg.CustomTemplates))
+		idMode = false
+	} else if idMode {
+		filters.IDs = cfg.TemplateIds
+		if len(cfg.Severity) > 0 || len(cfg.Tags) > 0 || len(cfg.ExcludeTags) > 0 {
+			log.Printf("nuclei: templateIds set — dropping -severity/-tags/-etags (incompatible with -id)")
+		}
+	} else {
+		if len(cfg.Severity) > 0 {
+			filters.Severity = strings.Join(cfg.Severity, ",")
+		}
+		if len(cfg.Tags) > 0 {
+			filters.Tags = cfg.Tags
+		}
+		if len(cfg.ExcludeTags) > 0 {
+			filters.ExcludeTags = cfg.ExcludeTags
+		}
+	}
+
+	rl := 150
+	if cfg.RateLimit != nil && *cfg.RateLimit > 0 {
+		rl = *cfg.RateLimit
+	}
+	c := 25
+	if cfg.Concurrency != nil && *cfg.Concurrency > 0 {
+		c = *cfg.Concurrency
+	}
+	fr := cfg.FollowRedirects != nil && *cfg.FollowRedirects
+
+	// Interactsh is enabled unless the operator opts out: blind/OOB templates
+	// (RCE, SSRF, XXE) silently produce zero findings without it, which is why
+	// a bare connector scan used to return far fewer results than the CLI.
+	interactsh := true
+	if cfg.Interactsh != nil {
+		interactsh = *cfg.Interactsh
+	}
+
+	return params{templates, filters, rl, c, fr, idMode, !interactsh}
+}
+
+// sdkOptions converts resolved params into nuclei SDK option functions.
+// HostConcurrency is hardcoded to 25, matching BulkSize default from
+// pkg/types/types.go DefaultOptions() (T1 spike confirmed).
+func sdkOptions(ctx context.Context, p params) []nuclei.NucleiSDKOptions {
+	opts := []nuclei.NucleiSDKOptions{
+		nuclei.DisableUpdateCheck(),
+		nuclei.WithTemplatesOrWorkflows(nuclei.TemplateSources{Templates: p.templates}),
+		nuclei.WithVerbosity(nuclei.VerbosityOptions{Silent: true}),
+	}
+	if p.filters.Severity != "" || p.filters.Tags != nil || p.filters.ExcludeTags != nil || p.filters.IDs != nil {
+		opts = append(opts, nuclei.WithTemplateFilters(p.filters))
+	}
+	opts = append(opts, nuclei.WithGlobalRateLimitCtx(ctx, p.rateLimit, time.Second))
+	opts = append(opts, nuclei.WithConcurrency(nuclei.Concurrency{
+		TemplateConcurrency:           p.concurrency,
+		HostConcurrency:               25,
+		HeadlessHostConcurrency:       10,
+		HeadlessTemplateConcurrency:   10,
+		JavascriptTemplateConcurrency: 1,
+		TemplatePayloadConcurrency:    25,
+		ProbeConcurrency:              50,
+	}))
+	// nuclei ignores HTTP_PROXY; pass the worker's egress proxy explicitly.
+	if proxy := httphelper.ProxyOrEnv(""); proxy != "" {
+		opts = append(opts, nuclei.WithProxy([]string{proxy}, false))
+	}
+	if p.noInteractsh {
+		// NoInteractsh:true alone panics (CacheSize=0 → gcache Build).
+		// Backfill the SDK's DefaultOptions cache fields so init() succeeds
+		// while the client stays lazy (poll/URL short-circuit on NoInteractsh).
+		opts = append(opts, nuclei.WithInteractshOptions(nuclei.InteractshOpts{
+			NoInteractsh: true,
+			CacheSize:    5000,
+			Eviction:     60 * time.Second,
+			PollDuration: 5 * time.Second,
+		}))
+	}
+	return opts
+}
+
+// Validate is intentionally a no-op: inputs are validated upstream by the
+// worker node against the connector's inputsSchema.
+func (a *NucleiAdapter) Validate(_ context.Context, _ map[string]any) error {
+	return nil
+}
+
+// Execute runs nuclei against target using the in-process SDK engine and
+// streams findings to out. Engine panics are recovered and returned as errors.
+func (a *NucleiAdapter) Execute(ctx context.Context, inputs map[string]any, out chan<- connector.Finding) (retErr error) {
+	defer func() {
+		if r := recover(); r != nil {
+			retErr = fmt.Errorf("nuclei engine panic: %v", r)
+		}
+	}()
+
+	target, _ := inputs["target"].(string)
+	target = strings.TrimSpace(target)
+	if target == "" {
+		return fmt.Errorf("target required")
+	}
+
+	dir := templateDir()
+	st, statErr := os.Stat(dir)
+	if statErr != nil || !st.IsDir() {
+		return fmt.Errorf("nuclei templates dir missing: %s: %v (rebuild image so /opt/nuclei-templates is baked, or set NUCLEI_TEMPLATE_DIR)", dir, statErr)
+	}
+	entries, readErr := os.ReadDir(dir)
+	if readErr != nil || len(entries) == 0 {
+		return fmt.Errorf("nuclei templates dir empty: %s (bake failed or volume shadowed it; rm the oasm-nuclei-templates volume)", dir)
+	}
+	log.Printf("nuclei: using templates dir=%s entries=%d", dir, len(entries))
+
+	cfg, err := connector.LoadConfig[Config](ctx)
+	if err != nil {
+		return err
+	}
+
+	scanDir := dir
+	if len(cfg.CustomTemplates) > 0 {
+		staged, err := stageCustomTemplates(ctx, cfg.CustomTemplates)
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(staged)
+		scanDir = staged
+	}
+
+	p := scanParams(*cfg, scanDir)
+	// The engine's templates dir stays the baked collection; custom templates
+	// are only the scan source.
+	nuclei.DefaultConfig.SetTemplatesDir(dir)
+
+	engine, err := nuclei.NewNucleiEngineCtx(ctx, sdkOptions(ctx, p)...)
+	if err != nil {
+		return fmt.Errorf("nuclei engine: %w", err)
+	}
+	defer engine.Close()
+
+	engine.Options().FollowRedirects = p.followRedirects
+	engine.LoadTargets([]string{target}, false)
+	if !strings.Contains(target, "://") {
+		if hm := probeHTTPInput(target); hm != nil {
+			defer hm.Close()
+			engine.GetExecuterOptions().InputHelper.InputsHTTP = hm
+		}
+	}
+
+	findings, skipped := 0, 0
+	defer func() { log.Printf("nuclei: done findings=%d skipped=%d", findings, skipped) }()
+
+	scanErr := engine.ExecuteCallbackWithCtx(ctx, func(ev *nucleiOutput.ResultEvent) {
+		sent, err := emitFinding(ctx, ev, out, resultEventToFinding)
+		if err != nil {
+			return
+		}
+		if sent {
+			findings++
+		} else {
+			skipped++
+		}
+	})
+
+	if scanErr != nil {
+		if errors.Is(scanErr, nuclei.ErrNoTemplatesAvailable) {
+			return fmt.Errorf("nuclei scan: no templates available")
+		}
+		if errors.Is(scanErr, nuclei.ErrNoTargetsAvailable) {
+			return fmt.Errorf("nuclei scan: no targets available")
+		}
+		return fmt.Errorf("nuclei scan: %w", scanErr)
+	}
+
+	// A reachable target never produces zero findings AND skipped events:
+	// skipped results come from nuclei's "host was skipped as it was found
+	// unresponsive" events. Surfacing that as a failure beats reporting a
+	// silent empty scan the operator cannot distinguish from a clean target.
+	if findings == 0 && skipped > 0 {
+		return fmt.Errorf("nuclei scan: 0 findings but %d template results were skipped (target marked unresponsive) — check target reachability and container network egress", skipped)
+	}
+	return nil
+}
+
+// probeHTTPInput does what `nuclei -u host` does and the SDK skips: find the
+// scheme that answers so http templates use it, while the bare host stays the
+// input for dns/ssl/network templates. Nil on a miss — nuclei then falls back
+// to https:// for http templates, as before.
+func probeHTTPInput(target string) *hybrid.HybridMap {
+	opts := httpx.DefaultOptions
+	opts.Timeout = 5 * time.Second // same as the SDK's own probe client
+	client, err := httpx.New(&opts)
+	if err != nil {
+		log.Printf("nuclei: http probe client: %v", err)
+		return nil
+	}
+	defer client.Dialer.Close()
+
+	probed := nucleiUtils.ProbeURL(target, client)
+	if probed == "" {
+		return nil
+	}
+	hm, err := hybrid.New(hybrid.DefaultMemoryOptions)
+	if err != nil {
+		log.Printf("nuclei: http probe map: %v", err)
+		return nil
+	}
+	_ = hm.Set(target, []byte(probed))
+	log.Printf("nuclei: http probe %s -> %s", target, probed)
+	return hm
+}
+
+// normalizeSeverity maps a scanner severity onto the Finding enum; anything
+// outside it (e.g. nuclei "unknown") becomes "info" rather than killing the
+// whole stream at runtime validation.
+func normalizeSeverity(s string) string {
+	s = strings.ToLower(strings.TrimSpace(s))
+	for _, v := range connector.Severities {
+		if s == v {
+			return s
+		}
+	}
+	return "info"
+}
+
+// resultEventToFinding maps one nuclei SDK output.ResultEvent onto a
+// connector.Finding. Events whose name is empty in both info.name and
+// template-id yield an error so the caller skips them instead of failing the
+// stream. Severity "unknown" normalizes to "info" via normalizeSeverity,
+// mirroring the old JSONL parser's no-drop behaviour. StringSlice fields use
+// ToSlice() because stringslice models a single string OR a []string.
+//
+// Engine error events are rejected: when a target is marked permanently
+// unresponsive, nuclei still calls the result callback once per remaining
+// template with a synthetic event (Info populated, Matched/IP empty,
+// Error="host was skipped as it was found unresponsive"). Emitting those would
+// turn every skipped template into a bogus vulnerability.
+func resultEventToFinding(event *nucleiOutput.ResultEvent) (connector.Finding, error) {
+	if event.Error != "" {
+		return connector.Finding{}, fmt.Errorf("finding event carries an engine error: %s", event.Error)
+	}
+	name := event.Info.Name
+	if name == "" {
+		name = event.TemplateID
+	}
+	if name == "" {
+		return connector.Finding{}, fmt.Errorf("finding event has no name")
+	}
+
+	f := connector.Finding{
+		Name:        name,
+		Severity:    normalizeSeverity(event.Info.SeverityHolder.Severity.String()),
+		Description: event.Info.Description,
+		Tags:        event.Info.Tags.ToSlice(),
+		Solution:    event.Info.Remediation,
+		MatchedAt:   event.Matched,
+		Host:        event.Host,
+		IP:          event.IP,
+		Timestamp:   event.Timestamp,
+	}
+	if event.Info.Reference != nil {
+		f.References = event.Info.Reference.ToSlice()
+	}
+	if authors := event.Info.Authors.ToSlice(); len(authors) > 0 {
+		f.Authors = authors
+	}
+	if c := event.Info.Classification; c != nil {
+		f.CVEID = c.CVEID.ToSlice()
+		f.CWEID = c.CWEID.ToSlice()
+		f.CVSSScore = c.CVSSScore
+		f.CVSSMetrics = c.CVSSMetrics
+		f.EPSSScore = c.EPSSScore
+	}
+	return f, nil
+}
+
+// emitFinding maps a nuclei result event to a Finding and sends it to the
+// output channel. It wraps panic recovery on the engine goroutine.
+// mapFn defaults to resultEventToFinding; injectable for testing.
+func emitFinding(
+	ctx context.Context,
+	ev *nucleiOutput.ResultEvent,
+	out chan<- connector.Finding,
+	mapFn func(*nucleiOutput.ResultEvent) (connector.Finding, error),
+) (sent bool, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			sent = false
+			err = fmt.Errorf("nuclei event handler panic: %v", r)
+		}
+	}()
+	f, mapErr := mapFn(ev)
+	if mapErr != nil {
+		return false, nil
+	}
+	select {
+	case out <- f:
+		return true, nil
+	case <-ctx.Done():
+		return false, ctx.Err()
+	}
+}

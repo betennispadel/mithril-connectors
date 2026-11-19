@@ -1,0 +1,77 @@
+# Nuclei Connector
+
+Reference connector proving Core → Worker (docker.sock) → Connector SDK → tool → back.
+Embeds [projectdiscovery/nuclei](https://github.com/projectdiscovery/nuclei) v3.11.1 as a Go library (`github.com/projectdiscovery/nuclei/v3/lib`) and scans in-process.
+
+## Requirements
+
+- Go 1.26+, Docker, Worker reachable at `WORKER_GRPC_ADDR`
+- Nuclei v3.11.1 embedded as a Go library dependency (`github.com/projectdiscovery/nuclei/v3/lib`); scans run in-process
+
+This connector is its own Go module. All dependencies, including the SDK (pulled in via a local `replace` to `../../sdk`), are declared in this directory's `go.mod`, so run build and test commands from here.
+
+## Configuration
+
+| Parameter | env | default | mandatory | description |
+|-----------|-----|---------|-----------|-------------|
+| Worker address | `WORKER_GRPC_ADDR` | `localhost:50051` | yes | Worker gRPC endpoint (missing → fatal) |
+| Worker token | `WORKER_TOKEN` | `` | no | Auth token if Worker requires it |
+| Execution ID | `EXECUTION_ID` | — | yes | Job identity; the Worker routes `ExecuteJob` by it |
+| Target | `inputs.target` | — | yes | Scan target: `http(s)://` URL or bare domain |
+
+The capability's `inputsSchema` (see `manifest.yaml`): `{target: string (uri)}`.
+
+## Example config profile
+
+```yaml
+# Connector profile submitted to the Worker (ExecutionCommand spec)
+slug: nuclei
+image: ghcr.io/oasm-platform/connector-nuclei:3.11.1
+inputs:
+  target: https://example.com
+config: # matches configSchema in manifest.yaml
+  severity: [info, low, medium, high, critical]
+  interactsh: true
+  tags: [cves]
+  rateLimit: 150
+  concurrency: 25
+  followRedirects: true
+```
+
+`interactsh` (default `true`) enables out-of-band detection for blind SSRF/RCE/XXE
+templates; it needs outbound access to a public interactsh server. Set it to
+`false` in air-gapped environments (OOB templates then return nothing).
+
+## Deployment
+
+### Docker
+
+```bash
+docker build -t ghcr.io/oasm-platform/connector-nuclei:3.11.1 -f vulnerabilities/nuclei/Dockerfile .
+docker run --rm -e WORKER_GRPC_ADDR=worker:50051 -e EXECUTION_ID=job-1 \
+  ghcr.io/oasm-platform/connector-nuclei:3.11.1
+```
+
+### Manual
+
+```bash
+cd vulnerabilities/nuclei && go run .
+```
+
+## Behavior
+
+- `adapter.go` — `NucleiAdapter` (tool-specific parsing stub); `Validate` + `Execute`
+- `main.go` — wires `NucleiAdapter` + SDK (`sdk/connector`, `sdk/runtime`)
+- `manifest.yaml` — source of truth for `manifest.json` (image `ghcr.io/oasm-platform/connector-nuclei:3.11.1` is a single binary embedding the nuclei library)
+- `Dockerfile` — `golang:1.26-alpine` builder → `alpine:3.20` non-root single-binary image; templates baked at build time via `cmd/templates` + installer API
+
+## Testing
+
+```bash
+cd vulnerabilities/nuclei && go test ./... -v -count=1
+cd vulnerabilities/nuclei && go vet ./...
+```
+
+## 14-step trace
+
+Core (`manifest.json` via `ConnectorRegistry`) → `WorkerStream ExecutionCommand{spec{image, inputs}}` → Worker `ExecutionManager` → `DockerRuntime.Create(Image: spec.Image)` via `docker.sock` → Connector SDK → `NucleiAdapter.Execute` → proxy → Core persist.

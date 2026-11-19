@@ -1,6 +1,7 @@
 go 1.26.0
 
 use (
+	./sdk
 	./cti/brand-protection
 	./cti/crypto
 	./cti/darkweb
@@ -9,4 +10,19 @@ use (
 	./cti/social-monitor
 	./cti/supplier-risk
 	./sast/semgrep
+	./ports_scanner/nmap
+	./ports_scanner/rustscan
+	./sca/trivy
+	./secrets/gitleaks
+	./url_discovery/arjun
+	./url_discovery/dirsearch
+	./url_discovery/ffuf
+	./url_discovery/gau
+	./url_discovery/katana
+	./vulnerabilities/acunetix
+	./vulnerabilities/nessus
+	./vulnerabilities/nikto
+	./vulnerabilities/nuclei
+	./vulnerabilities/wpscan
+	./vulnerabilities/zap
 )

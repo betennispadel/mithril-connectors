@@ -1,0 +1,89 @@
+# connector image (SDK+tool) — built from ./Dockerfile, not upstream image
+name: Nuclei
+slug: nuclei
+version: 3.11.1
+image: ghcr.io/oasm-platform/connector-nuclei:3.11.1
+author: 'oasm'
+pricingTier: [free]
+homepage: 'https://projectdiscovery.io'
+repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
+supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+shortDescription: 'Fast template-based vulnerability scanner'
+description: 'Runs ProjectDiscovery Nuclei template-based scans against a target URL to detect known vulnerabilities, misconfigurations, and exposed secrets.'
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [domain, ip, cidr]
+    inputs: [host, web]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      required: [target]
+      properties:
+        target:
+          type: string
+          format: uri
+          title: Scan target
+          description: 'Target URL or hostname to scan.'
+          examples: [https://example.com]
+          ui:placeholder: 'https://example.com'
+      additionalProperties: false
+agentTool: true
+configSchema:
+  type: object
+  additionalProperties: false
+  properties:
+    severity:
+      type: array
+      items:
+        type: string
+        enum: [info, low, medium, high, critical]
+      title: Severity levels
+      description: 'Only report findings at the selected severity levels.'
+      default: [info, low, medium, high, critical]
+    interactsh:
+      type: boolean
+      default: true
+      title: Out-of-band detection (Interactsh)
+      description: 'Detect blind/OOB vulnerabilities (SSRF, RCE, XXE) via a public interactsh server. Requires outbound network access; disable in air-gapped networks.'
+    tags:
+      type: array
+      items:
+        type: string
+      title: Template tags
+      description: 'Only run templates matching these tags.'
+      examples: [[cve, rce]]
+      ui:placeholder: 'e.g. cve, rce'
+    excludeTags:
+      type: array
+      items:
+        type: string
+      title: Excluded tags
+      description: 'Skip templates that match these tags.'
+      examples: [[dos, fuzz]]
+      ui:placeholder: 'e.g. dos, fuzz'
+    templateIds:
+      type: array
+      items:
+        type: string
+      title: Template IDs
+      description: 'Only run these specific template IDs.'
+      examples: [[CVE-2024-12345, wordpress-rce]]
+      ui:placeholder: 'e.g. CVE-2024-12345'
+    rateLimit:
+      type: integer
+      default: 150
+      title: Rate limit
+      description: 'Maximum HTTP requests per second.'
+    concurrency:
+      type: integer
+      default: 25
+      title: Concurrency
+      description: 'Maximum templates executed in parallel.'
+    followRedirects:
+      type: boolean
+      title: Follow redirects
+      description: 'Follow HTTP redirects during the scan.'
+resourceDefaults:
+  cpu: 500m
+  memory: 4096Mi
+  timeoutSeconds: 600

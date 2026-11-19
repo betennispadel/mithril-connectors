@@ -1,0 +1,84 @@
+name: Nmap
+slug: nmap
+version: 7.99
+image: ghcr.io/oasm-platform/connector-nmap:7.99
+author: 'oasm'
+pricingTier: [free]
+egress: direct
+homepage: 'https://nmap.org'
+repositoryUrl: 'https://github.com/oasm-platform/oasm-connectors'
+supportUrl: 'https://github.com/oasm-platform/oasm-connectors/issues'
+shortDescription: 'TCP/UDP port scanner and CVE detection'
+description: 'Scans a single host with Nmap (Nmap Security Scanner) and streams every open port as a finding for port scanning: one finding per protocol/port with its Nmap service name, product and version. For vulnerabilities it adds service version detection and the vulners NSE script and streams one finding per CVE matched to a detected service version. Unprivileged TCP connect scan; requires no raw sockets.'
+capabilities:
+  - name: ports_scanner
+    targetTypes: [domain, ip, cidr]
+    inputs: [host]
+    produces: [service]
+    inputsSchema:
+      type: object
+      required: [target]
+      properties:
+        target:
+          type: string
+          format: uri
+          title: Target host
+          description: 'Host to scan: a hostname, an IPv4 literal, or a bracketed IPv6 literal. Scheme and path are stripped; CIDR ranges, lists and wildcards are rejected.'
+          examples: [example.com, 203.0.113.10]
+          ui:placeholder: 'example.com'
+      additionalProperties: false
+  - name: vulnerabilities
+    targetTypes: [domain, ip, cidr]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      required: [target]
+      properties:
+        target:
+          type: string
+          format: uri
+          title: Target host
+          description: 'Host to scan: a hostname, an IPv4 literal, or a bracketed IPv6 literal. Scheme and path are stripped; CIDR ranges, lists and wildcards are rejected.'
+          examples: [example.com, 203.0.113.10]
+          ui:placeholder: 'example.com'
+      additionalProperties: false
+agentTool: true
+configSchema:
+  type: object
+  additionalProperties: false
+  properties:
+    ports:
+      type: string
+      title: Ports
+      description: 'Port specification handed to nmap -p, e.g. "22,80,443" or "1-1024". Digits, commas and hyphens only. When empty, nmap scans its default top-1000 TCP ports (or topPorts below).'
+      ui:placeholder: '22,80,443,8000-8100'
+    topPorts:
+      type: integer
+      minimum: 1
+      maximum: 65535
+      default: 1000
+      title: Top ports
+      description: 'Scan the N most common ports (nmap --top-ports). Ignored when ports is set. 1000 = nmap''s own default port list.'
+    hostTimeout:
+      type: integer
+      minimum: 0
+      default: 600
+      title: Per-host timeout (seconds)
+      description: 'Give up on the host after this long (nmap --host-timeout) and report what was found. Raise it for slow or heavily filtered targets; 0 = no per-host limit. The adapter always enforces a 20 minute hard timeout for the whole run.'
+    retries:
+      type: integer
+      minimum: 1
+      maximum: 10
+      default: 2
+      title: Max retries
+      description: 'Maximum probe retransmissions per port (nmap --max-retries). Lower is faster on filtered hosts; raise it for lossy links.'
+    noPing:
+      type: boolean
+      default: true
+      title: Skip host discovery
+      description: 'Treat the host as up and skip the ping check (nmap -Pn). Keep enabled for firewalled or NAT-ed hosts; disable only when you want a ping failure to end the scan early.'
+resourceDefaults:
+  cpu: 500m
+  memory: 512Mi
+  timeoutSeconds: 1800
