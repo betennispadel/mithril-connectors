@@ -1,0 +1,12 @@
+go 1.26.0
+
+use (
+	./cti/brand-protection
+	./cti/crypto
+	./cti/darkweb
+	./cti/data-leaks
+	./cti/ioc-feed
+	./cti/social-monitor
+	./cti/supplier-risk
+	./sast/semgrep
+)
