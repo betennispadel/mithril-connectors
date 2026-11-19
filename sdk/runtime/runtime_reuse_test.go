@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
-	pb "github.com/oasm-platform/oasm-connectors/sdk/proto/gen"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
+	pb "github.com/betennispadel/mithril-connectors/sdk/proto/gen"
 )
 
 // Phase 2 warm pool: ONE stream serves MULTIPLE executions sequentially. The

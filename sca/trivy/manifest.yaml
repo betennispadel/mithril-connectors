@@ -2,7 +2,7 @@
 name: Trivy - Dependency & IaC Scanner
 slug: trivy
 version: 0.76.2
-image: ghcr.io/betennispadel/connector-trivy:0.76.2
+image: ghcr.io/betennispadel/connector-morpheus:0.76.2
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://trivy.dev'

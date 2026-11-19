@@ -1,7 +1,7 @@
 name: ffuf - Web Fuzzer
 slug: ffuf
 version: 2.3.0
-image: ghcr.io/betennispadel/connector-ffuf:2.3.0
+image: ghcr.io/betennispadel/connector-alohomora:2.3.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://github.com/ffuf/ffuf'

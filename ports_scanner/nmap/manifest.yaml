@@ -1,7 +1,7 @@
 name: Nmap
 slug: nmap
 version: 7.99
-image: ghcr.io/betennispadel/connector-nmap:7.99
+image: ghcr.io/betennispadel/connector-sting:7.99
 author: 'oasm'
 pricingTier: [free]
 egress: direct

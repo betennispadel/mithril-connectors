@@ -1,7 +1,7 @@
 name: OWASP ZAP - Web Application Scanner
 slug: zap
 version: 2.17.0
-image: ghcr.io/betennispadel/connector-zap:2.17.0
+image: ghcr.io/betennispadel/connector-red-pill:2.17.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://www.zaproxy.org'

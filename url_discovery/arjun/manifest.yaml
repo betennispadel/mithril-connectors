@@ -1,7 +1,7 @@
 name: Arjun - Parameter Discovery
 slug: arjun
 version: 2.2.7
-image: ghcr.io/betennispadel/connector-arjun:2.2.7
+image: ghcr.io/betennispadel/connector-niffler:2.2.7
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://github.com/s0md3v/Arjun'

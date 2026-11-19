@@ -1,7 +1,7 @@
 name: Nikto - Web Server Scanner
 slug: nikto
 version: 2.6.1
-image: ghcr.io/betennispadel/connector-nikto:2.6.1
+image: ghcr.io/betennispadel/connector-dementor:2.6.1
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://cirt.net/Nikto2'

@@ -13,7 +13,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 type BrandProtectionConfig struct {

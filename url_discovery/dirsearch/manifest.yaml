@@ -1,7 +1,7 @@
 name: dirsearch - Web Path Scanner
 slug: dirsearch
 version: 0.5.0
-image: ghcr.io/betennispadel/connector-dirsearch:0.5.0
+image: ghcr.io/betennispadel/connector-marauders-map:0.5.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://github.com/maurosoria/dirsearch'

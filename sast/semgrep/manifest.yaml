@@ -1,7 +1,7 @@
 name: Architect
 slug: semgrep
 version: 1.90.0
-image: connector-semgrep:1.90.0
+image: connector-architect:1.90.0
 author: custom
 pricingTier: [free]
 shortDescription: Static code analysis for security vulnerabilities

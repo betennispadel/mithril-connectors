@@ -1,7 +1,7 @@
 name: RustScan - Port Scanner
 slug: rustscan
 version: 2.4.1
-image: ghcr.io/betennispadel/connector-rustscan:2.4.1
+image: ghcr.io/betennispadel/connector-bullet-time:2.4.1
 author: 'oasm'
 pricingTier: [free]
 egress: direct

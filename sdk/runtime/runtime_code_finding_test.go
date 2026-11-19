@@ -3,7 +3,7 @@ package runtime
 import (
 	"testing"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // TestToProtoFindingCarriesCodeFields guards the code-finding fields on the

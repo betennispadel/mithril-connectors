@@ -2,7 +2,7 @@ module connector-supplier-risk
 
 go 1.26.0
 
-require github.com/oasm-platform/oasm-connectors/sdk v0.0.0-20261116064756-b84f4807f613
+require github.com/betennispadel/mithril-connectors/sdk v0.0.0-20261116064756-b84f4807f613
 
 require (
 	golang.org/x/net v0.62.0 // indirect

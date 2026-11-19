@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
-	pb "github.com/oasm-platform/oasm-connectors/sdk/proto/gen"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
+	pb "github.com/betennispadel/mithril-connectors/sdk/proto/gen"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

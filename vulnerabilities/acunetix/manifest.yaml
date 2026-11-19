@@ -1,7 +1,7 @@
 name: Acunetix
 slug: acunetix
 version: 0.1.0
-image: ghcr.io/betennispadel/connector-acunetix:0.1.0
+image: ghcr.io/betennispadel/connector-one-ring:0.1.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://www.acunetix.com'

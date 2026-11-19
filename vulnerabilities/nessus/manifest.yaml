@@ -1,7 +1,7 @@
 name: Nessus
 slug: nessus
 version: 0.2.0
-image: ghcr.io/betennispadel/connector-nessus:0.2.0
+image: ghcr.io/betennispadel/connector-horcrux:0.2.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://www.tenable.com'

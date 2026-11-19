@@ -2,7 +2,7 @@
 name: Nuclei
 slug: nuclei
 version: 3.11.1
-image: ghcr.io/betennispadel/connector-nuclei:3.11.1
+image: ghcr.io/betennispadel/connector-palantir:3.11.1
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://projectdiscovery.io'

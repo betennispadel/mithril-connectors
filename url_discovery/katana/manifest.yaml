@@ -1,7 +1,7 @@
 name: Katana - Web Crawler
 slug: katana
 version: 1.8.0
-image: ghcr.io/betennispadel/connector-katana:1.8.0
+image: ghcr.io/betennispadel/connector-elder-wand:1.8.0
 author: 'oasm'
 pricingTier: [free]
 homepage: 'https://github.com/projectdiscovery/katana'
