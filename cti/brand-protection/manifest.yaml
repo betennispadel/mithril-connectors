@@ -1,0 +1,46 @@
+name: Brand Protection
+slug: brand-protection
+version: 1.0.0
+image: connector-brand-protection:1.0.0
+author: custom
+pricingTier: [free]
+shortDescription: Phishing, typosquatting and certificate monitoring for your domain
+description: Monitors OpenPhish for active phishing URLs, generates typosquatting domain variants, and enumerates certificates via crt.sh.
+agentTool: true
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [domain]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      required: [host]
+      properties:
+        host:
+          type: string
+          title: Domain
+          description: Company domain. Auto-filled from target.
+        brandName:
+          type: string
+          title: Brand Name
+          maxLength: 100
+        keywords:
+          type: string
+          title: Additional Keywords
+          maxLength: 500
+        country:
+          type: string
+          title: Country Code
+          maxLength: 2
+          pattern: ^[A-Z]{2}$
+configSchema:
+  type: object
+  properties:
+    maxFindings:
+      type: integer
+      title: Max Findings
+      default: 500
+resourceDefaults:
+  cpu: 500m
+  memory: 256Mi
+  timeoutSeconds: 600

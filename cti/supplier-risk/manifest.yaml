@@ -1,0 +1,48 @@
+name: Supplier Risk
+slug: supplier-risk
+version: 1.0.0
+image: connector-supplier-risk:1.0.0
+author: custom
+pricingTier: [free]
+shortDescription: Sanctions, export controls and vendor risk - OpenSanctions, OFAC, BIS, CMIC
+description: Checks organizations against OpenSanctions, OFAC Consolidated Screening List, BIS Entity List, Pentagon CMIC, and CISA KEV vendor vulnerabilities.
+agentTool: true
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [domain]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      properties:
+        host:
+          type: string
+          title: Domain / Host
+          description: Supplier domain. Auto-filled from target.
+        entityType:
+          type: string
+          title: Entity Type
+          enum: [organization, person, vessel, aircraft]
+          default: organization
+        name:
+          type: string
+          title: Entity Name
+          maxLength: 200
+        country:
+          type: string
+          title: Country Code
+          maxLength: 2
+configSchema:
+  type: object
+  properties:
+    openSanctionsApiKey:
+      type: string
+      title: OpenSanctions API Key
+    maxFindings:
+      type: integer
+      title: Max Findings
+      default: 200
+resourceDefaults:
+  cpu: 250m
+  memory: 256Mi
+  timeoutSeconds: 300

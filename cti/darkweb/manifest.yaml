@@ -1,0 +1,50 @@
+name: Dark Web Monitor
+slug: darkweb
+version: 1.0.0
+image: connector-darkweb:1.0.0
+author: custom
+pricingTier: [free]
+shortDescription: Ransomware victims, hacktivist threats and threat news monitoring
+description: Monitors ransomware.live for victim listings, CISA cybersecurity advisories, and threat news matching your organization keyword.
+agentTool: true
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [domain]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      required: [host]
+      properties:
+        host:
+          type: string
+          title: Domain / Host
+          description: Domain to monitor on dark web. Auto-filled from target.
+        keyword:
+          type: string
+          title: Custom Keyword
+          maxLength: 200
+        extraKeywords:
+          type: string
+          title: Additional Keywords
+          maxLength: 500
+        daysBack:
+          type: integer
+          title: Days Back
+          default: 90
+          minimum: 1
+          maximum: 365
+configSchema:
+  type: object
+  properties:
+    ransomwareLiveApiKey:
+      type: string
+      title: ransomware.live API Key
+    maxFindings:
+      type: integer
+      title: Max Findings
+      default: 500
+resourceDefaults:
+  cpu: 250m
+  memory: 256Mi
+  timeoutSeconds: 300

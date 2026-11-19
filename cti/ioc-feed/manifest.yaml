@@ -1,0 +1,48 @@
+name: IOC Feed
+slug: ioc-feed
+version: 1.0.0
+image: connector-ioc-feed:1.0.0
+author: custom
+pricingTier: [free]
+shortDescription: Multi-source IOC feed - abuse.ch, OTX, GreyNoise, AbuseIPDB, Tor exit nodes
+description: Aggregates IOC from abuse.ch (MalwareBazaar, ThreatFox, URLhaus, Feodo, SSLBL), AlienVault OTX, GreyNoise, AbuseIPDB, and Tor exit node lists.
+agentTool: true
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [domain, ip, cidr]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      required: [host]
+      properties:
+        host:
+          type: string
+          title: Host / IP / Domain
+          description: IP address (IPv4/IPv6) or domain name. Auto-filled from target.
+        includePassive:
+          type: boolean
+          title: Include Passive Intelligence
+          description: Also query OTX passive DNS and GreyNoise context.
+          default: true
+configSchema:
+  type: object
+  properties:
+    otxApiKey:
+      type: string
+      title: OTX API Key
+      description: AlienVault OTX API key
+    greyNoiseApiKey:
+      type: string
+      title: GreyNoise API Key
+    abuseIpDbApiKey:
+      type: string
+      title: AbuseIPDB API Key
+    maxFindings:
+      type: integer
+      title: Max Findings
+      default: 1000
+resourceDefaults:
+  cpu: 250m
+  memory: 256Mi
+  timeoutSeconds: 300

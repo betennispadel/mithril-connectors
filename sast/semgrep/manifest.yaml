@@ -1,0 +1,62 @@
+name: Architect
+slug: semgrep
+version: 1.90.0
+image: connector-semgrep:1.90.0
+author: custom
+pricingTier: [free]
+shortDescription: Static code analysis for security vulnerabilities
+description: Runs Semgrep SAST against repository source code to find security issues by severity and CWE category.
+agentTool: true
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [git_org]
+    inputs: [repository]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      required: [repository]
+      additionalProperties: false
+      properties:
+        repository:
+          type: string
+          format: uri
+          title: Repository
+          description: https clone URL of the repository to scan.
+        ref:
+          type: string
+          title: Ref
+          description: Branch, tag or commit to scan. Empty scans the default branch.
+        username:
+          type: string
+          title: Username
+        token:
+          type: string
+          title: Token
+          ui:widget: password
+configSchema:
+  type: object
+  additionalProperties: false
+  properties:
+    rulesets:
+      type: array
+      title: Rulesets
+      items:
+        type: string
+      default: [auto]
+    severity:
+      type: array
+      title: Severity
+      items:
+        type: string
+        enum: [info, low, medium, high, critical]
+      default: [info, low, medium, high, critical]
+    maxFindings:
+      type: integer
+      title: Max findings
+      default: 500
+      minimum: 0
+      maximum: 10000
+resourceDefaults:
+  cpu: 1000m
+  memory: 2048Mi
+  timeoutSeconds: 3600

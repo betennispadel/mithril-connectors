@@ -1,0 +1,65 @@
+name: Social Monitor
+slug: social-monitor
+version: 1.0.0
+image: connector-social-monitor:1.0.0
+author: custom
+pricingTier: [free]
+shortDescription: Social media and news monitoring - Twitter, Telegram, Google News, NewsData.io
+description: Monitors Twitter/X, Telegram channels, Google News, and NewsData.io for brand mentions and threat intelligence.
+agentTool: true
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [domain]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      properties:
+        keyword:
+          type: string
+          title: Keyword / Brand / Name
+          maxLength: 200
+        host:
+          type: string
+          title: Domain (auto-fill)
+        aliases:
+          type: string
+          title: Aliases / Variants
+          maxLength: 500
+        language:
+          type: string
+          title: Language
+          maxLength: 2
+        twitterHandle:
+          type: string
+          title: Twitter/X Handle
+          maxLength: 50
+configSchema:
+  type: object
+  properties:
+    twitterBearerToken:
+      type: string
+      title: Twitter/X Bearer Token
+    hasDataApiKey:
+      type: string
+      title: HasData API Key
+    newsDataApiKey:
+      type: string
+      title: NewsData.io API Key
+    telegramBotToken:
+      type: string
+      title: Telegram Bot Token
+    maxFindings:
+      type: integer
+      title: Max Findings
+      default: 200
+    daysBack:
+      type: integer
+      title: Days Back
+      default: 7
+      minimum: 1
+      maximum: 30
+resourceDefaults:
+  cpu: 250m
+  memory: 256Mi
+  timeoutSeconds: 300

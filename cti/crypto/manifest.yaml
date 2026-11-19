@@ -1,0 +1,41 @@
+name: Crypto Intelligence
+slug: crypto
+version: 1.0.0
+image: connector-crypto:1.0.0
+author: custom
+pricingTier: [free]
+shortDescription: Crypto wallet risk - OFAC SDN, Chainabuse, Etherscan, OpenSanctions
+description: Checks crypto wallet addresses against OFAC SDN, Chainabuse community reports, OpenSanctions, and retrieves transaction history.
+agentTool: true
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [domain]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      required: [host]
+      properties:
+        host:
+          type: string
+          title: Wallet Address / Domain
+          description: Cryptocurrency wallet address or domain. Auto-filled from target.
+        chainType:
+          type: string
+          title: Blockchain
+          enum: [auto, bitcoin, ethereum, tron, litecoin]
+          default: auto
+configSchema:
+  type: object
+  properties:
+    etherscanApiKey:
+      type: string
+      title: Etherscan API Key
+    maxFindings:
+      type: integer
+      title: Max Findings
+      default: 200
+resourceDefaults:
+  cpu: 250m
+  memory: 256Mi
+  timeoutSeconds: 300

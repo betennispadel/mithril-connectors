@@ -1,0 +1,43 @@
+name: Data Leaks
+slug: data-leaks
+version: 1.0.0
+image: connector-data-leaks:1.0.0
+author: custom
+pricingTier: [free]
+shortDescription: Multi-entity credential and data leak intelligence
+description: Searches LeakRadar and Hudson Rock Cavalier for leaked credentials, stealer logs, combolists, dark web mentions, and raw leak files.
+agentTool: true
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [domain, ip]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      properties:
+        host:
+          type: string
+          title: Host / Primary Value
+          description: Domain, IP address, email address, or username. Auto-filled from target.
+        entityType:
+          type: string
+          title: Entity Type
+          enum: [auto, domain, email, username, person, organization, brand, keyword, ip, url, application]
+          default: auto
+configSchema:
+  type: object
+  properties:
+    leakRadarApiKey:
+      type: string
+      title: LeakRadar API Key
+    hudsonRockApiKey:
+      type: string
+      title: Hudson Rock API Key
+    maxFindings:
+      type: integer
+      title: Max Findings
+      default: 500
+resourceDefaults:
+  cpu: 250m
+  memory: 256Mi
+  timeoutSeconds: 300
