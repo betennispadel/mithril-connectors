@@ -39,6 +39,8 @@ type Config struct {
 	Interactsh *bool `json:"interactsh"`
 	// CustomTemplates, when set, replace the baked collection: only these run.
 	CustomTemplates []CustomTemplate `json:"customTemplates"`
+	AuthHeader string `json:auth_header`
+	AuthCookie string `json:auth_cookie`
 }
 
 // defaultTemplateDir is where the Dockerfile bakes the template collection
@@ -204,11 +206,11 @@ func (a *NucleiAdapter) Execute(ctx context.Context, inputs map[string]any, out 
 	}
 
 	var customHeaders []string
-	if h, _ := inputs["auth_header"].(string); h != "" {
-		customHeaders = append(customHeaders, "Authorization: "+h)
+	if cfg.AuthHeader != "" {
+		customHeaders = append(customHeaders, "Authorization: "+cfg.AuthHeader)
 	}
-	if c, _ := inputs["auth_cookie"].(string); c != "" {
-		customHeaders = append(customHeaders, "Cookie: "+c)
+	if cfg.AuthCookie != "" {
+		customHeaders = append(customHeaders, "Cookie: "+cfg.AuthCookie)
 	}
 
 	scanDir := dir
