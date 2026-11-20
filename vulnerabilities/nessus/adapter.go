@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 	"github.com/tencat-dev/nessus-client-go/nessus"
 )
 

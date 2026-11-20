@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // itemRe matches the one stdout shape that carries a result, e.g.

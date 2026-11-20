@@ -92,7 +92,7 @@ type zapJob struct {
 // The report job is the ONLY output channel — its JSON is parsed into findings
 // and never surfaced as a user-facing report. scanMode baseline runs
 // spider + passive scan only; full opts into the active scanner.
-func buildAutomationPlan(target string, cfg *zapConfig, reportPath string) ([]byte, error) {
+func buildAutomationPlan(target string, cfg *zapConfig, reportPath string, authHeader, authCookie string) ([]byte, error) {
 	mode := strings.ToLower(strings.TrimSpace(cfg.ScanMode))
 	if mode == "" {
 		mode = "baseline"
@@ -158,6 +158,36 @@ func buildAutomationPlan(target string, cfg *zapConfig, reportPath string) ([]by
 			"maxScanDurationInMins": activeDuration,
 			"delayInMs":             cfg.DelayInMs,
 			"threadPerHost":         threads,
+		}})
+	}
+
+	// Auth header/cookie inject via replacer add-on (optional)
+	var replacerRules []map[string]any
+	if authHeader != "" {
+		replacerRules = append(replacerRules, map[string]any{
+			"description": "auth_header",
+			"enabled":     true,
+			"matchType":   "REQ_HEADER_STR",
+			"matchString": "Authorization",
+			"matchRegex":  false,
+			"replacement": authHeader,
+			"initiators":  []int{},
+		})
+	}
+	if authCookie != "" {
+		replacerRules = append(replacerRules, map[string]any{
+			"description": "auth_cookie",
+			"enabled":     true,
+			"matchType":   "REQ_HEADER_STR",
+			"matchString": "Cookie",
+			"matchRegex":  false,
+			"replacement": authCookie,
+			"initiators":  []int{},
+		})
+	}
+	if len(replacerRules) > 0 {
+		plan.Jobs = append(plan.Jobs, zapJob{Type: "replacer", Parameters: map[string]any{
+			"rules": replacerRules,
 		}})
 	}
 

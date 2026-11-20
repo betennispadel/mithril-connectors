@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // fakeNessus is a scripted fake of the Nessus REST API. It records call counts

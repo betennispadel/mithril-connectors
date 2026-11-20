@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // TestDirsearchE2E_RealScan is the real-surface artifact: it runs a live target

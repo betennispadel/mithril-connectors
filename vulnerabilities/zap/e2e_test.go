@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // TestE2E_RealZap drives a real ZAP install through the adapter. It is skipped

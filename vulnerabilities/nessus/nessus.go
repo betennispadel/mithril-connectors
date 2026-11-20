@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
-	httphelper "github.com/oasm-platform/oasm-connectors/sdk/http"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
+	httphelper "github.com/betennispadel/mithril-connectors/sdk/http"
 	"github.com/tencat-dev/nessus-client-go/nessus"
 )
 

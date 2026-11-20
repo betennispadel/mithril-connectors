@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // rustscanHardTimeout bounds the whole rustscan process. The manifest's

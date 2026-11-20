@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
-	httphelper "github.com/oasm-platform/oasm-connectors/sdk/http"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
+	httphelper "github.com/betennispadel/mithril-connectors/sdk/http"
 )
 
 // ffufConfig mirrors manifest.yaml configSchema. Keys are camelCase to match the

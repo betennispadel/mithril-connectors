@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	httphelper "github.com/oasm-platform/oasm-connectors/sdk/http"
+	httphelper "github.com/betennispadel/mithril-connectors/sdk/http"
 )
 
 // katanaConfig mirrors manifest.yaml configSchema. Keys are camelCase to match

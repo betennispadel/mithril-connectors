@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
-	"github.com/oasm-platform/oasm-connectors/sdk/gitrepo"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/gitrepo"
 )
 
 // sampleReport is real `trivy fs` 0.75.0 output for a repository with a

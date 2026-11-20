@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // TestNiktoE2E_TitleAndDescription proves that a real scan yields a Description

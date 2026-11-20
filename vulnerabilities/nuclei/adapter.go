@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
-	httphelper "github.com/oasm-platform/oasm-connectors/sdk/http"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
+	httphelper "github.com/betennispadel/mithril-connectors/sdk/http"
 	"github.com/projectdiscovery/hmap/store/hybrid"
 	"github.com/projectdiscovery/httpx/common/httpx"
 	nuclei "github.com/projectdiscovery/nuclei/v3/lib"
@@ -126,7 +126,7 @@ func scanParams(cfg Config, dir string) params {
 // sdkOptions converts resolved params into nuclei SDK option functions.
 // HostConcurrency is hardcoded to 25, matching BulkSize default from
 // pkg/types/types.go DefaultOptions() (T1 spike confirmed).
-func sdkOptions(ctx context.Context, p params) []nuclei.NucleiSDKOptions {
+func sdkOptions(ctx context.Context, p params, headers []string) []nuclei.NucleiSDKOptions {
 	opts := []nuclei.NucleiSDKOptions{
 		nuclei.DisableUpdateCheck(),
 		nuclei.WithTemplatesOrWorkflows(nuclei.TemplateSources{Templates: p.templates}),
@@ -145,6 +145,9 @@ func sdkOptions(ctx context.Context, p params) []nuclei.NucleiSDKOptions {
 		TemplatePayloadConcurrency:    25,
 		ProbeConcurrency:              50,
 	}))
+	if len(headers) > 0 {
+		opts = append(opts, nuclei.WithHeaders(headers))
+	}
 	// nuclei ignores HTTP_PROXY; pass the worker's egress proxy explicitly.
 	if proxy := httphelper.ProxyOrEnv(""); proxy != "" {
 		opts = append(opts, nuclei.WithProxy([]string{proxy}, false))
@@ -200,6 +203,14 @@ func (a *NucleiAdapter) Execute(ctx context.Context, inputs map[string]any, out 
 		return err
 	}
 
+	var customHeaders []string
+	if h, _ := inputs["auth_header"].(string); h != "" {
+		customHeaders = append(customHeaders, "Authorization: "+h)
+	}
+	if c, _ := inputs["auth_cookie"].(string); c != "" {
+		customHeaders = append(customHeaders, "Cookie: "+c)
+	}
+
 	scanDir := dir
 	if len(cfg.CustomTemplates) > 0 {
 		staged, err := stageCustomTemplates(ctx, cfg.CustomTemplates)
@@ -215,7 +226,7 @@ func (a *NucleiAdapter) Execute(ctx context.Context, inputs map[string]any, out 
 	// are only the scan source.
 	nuclei.DefaultConfig.SetTemplatesDir(dir)
 
-	engine, err := nuclei.NewNucleiEngineCtx(ctx, sdkOptions(ctx, p)...)
+	engine, err := nuclei.NewNucleiEngineCtx(ctx, sdkOptions(ctx, p, customHeaders)...)
 	if err != nil {
 		return fmt.Errorf("nuclei engine: %w", err)
 	}

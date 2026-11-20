@@ -178,7 +178,7 @@
         "properties": {
           "chunkSize": {
             "default": 250,
-            "description": "Parameters per request (Arjun -c). IGNORED whenever method != GET \u2014 upstream forces -c 500.",
+            "description": "Parameters per request (Arjun -c). IGNORED whenever method != GET — upstream forces -c 500.",
             "minimum": 1,
             "title": "Chunk size",
             "type": "integer"
@@ -201,7 +201,7 @@
             },
             "title": "Headers",
             "type": "array",
-            "ui:placeholder": "Authorization: Bearer \u2026"
+            "ui:placeholder": "Authorization: Bearer …"
           },
           "include": {
             "description": "Comma-separated list of known parameters to include in every request (Arjun --include).",
@@ -603,7 +603,7 @@
             },
             "title": "Headers",
             "type": "array",
-            "ui:placeholder": "X-Api-Key: \u2026"
+            "ui:placeholder": "X-Api-Key: …"
           },
           "jsCrawl": {
             "default": true,
@@ -1131,6 +1131,20 @@
                 "title": "Scan target",
                 "type": "string",
                 "ui:placeholder": "https://example.com"
+              },
+              "auth_header": {
+                "title": "Authorization Header",
+                "description": "Value for the Authorization header (e.g. Bearer eyJ... or ApiKey abc123). Leave empty for unauthenticated scan.",
+                "type": "string",
+                "ui:secret": true,
+                "ui:placeholder": "Bearer eyJhbGciOiJIUzI1NiJ9..."
+              },
+              "auth_cookie": {
+                "title": "Session Cookie",
+                "description": "Value for the Cookie header (e.g. session=abc123; csrftoken=xyz). Leave empty for unauthenticated scan.",
+                "type": "string",
+                "ui:secret": true,
+                "ui:placeholder": "session=abc123; csrftoken=xyz"
               }
             },
             "required": [
@@ -1285,6 +1299,20 @@
                 "title": "Scan target",
                 "type": "string",
                 "ui:placeholder": "https://example.com"
+              },
+              "auth_header": {
+                "title": "Authorization Header",
+                "description": "Value for the Authorization header (e.g. Bearer eyJ... or ApiKey abc123). Leave empty for unauthenticated scan.",
+                "type": "string",
+                "ui:secret": true,
+                "ui:placeholder": "Bearer eyJhbGciOiJIUzI1NiJ9..."
+              },
+              "auth_cookie": {
+                "title": "Session Cookie",
+                "description": "Value for the Cookie header (e.g. session=abc123; csrftoken=xyz). Leave empty for unauthenticated scan.",
+                "type": "string",
+                "ui:secret": true,
+                "ui:placeholder": "session=abc123; csrftoken=xyz"
               }
             },
             "required": [
@@ -1341,7 +1369,7 @@
           },
           "scanMode": {
             "default": "baseline",
-            "description": "baseline runs the spider and passive scanner only (safe). full additionally runs the active scanner, which actively attacks the target \u2014 use only with permission.",
+            "description": "baseline runs the spider and passive scanner only (safe). full additionally runs the active scanner, which actively attacks the target — use only with permission.",
             "enum": [
               "baseline",
               "full"
@@ -1429,7 +1457,7 @@
             "type": "integer"
           },
           "ports": {
-            "description": "Comma-separated ports handed to rustscan -p, e.g. \"22,80,443\". Numbers only \u2014 a range belongs in \"range\" (rustscan -p rejects \"1-1024\"). Takes precedence over range.",
+            "description": "Comma-separated ports handed to rustscan -p, e.g. \"22,80,443\". Numbers only — a range belongs in \"range\" (rustscan -p rejects \"1-1024\"). Takes precedence over range.",
             "title": "Ports",
             "type": "string",
             "ui:placeholder": "22,80,443"
@@ -2162,7 +2190,7 @@
             },
             "title": "Headers",
             "type": "array",
-            "ui:placeholder": "X-Api-Key: \u2026"
+            "ui:placeholder": "X-Api-Key: …"
           },
           "matchCodes": {
             "description": "Colon/comma-separated HTTP status codes to match (ffuf -mc).",
@@ -2607,13 +2635,13 @@
               "brandName": {
                 "type": "string",
                 "title": "Brand Name",
-                "description": "Explicit brand name to monitor (e.g., 'T\u00fcrkiye Finans'). Overrides auto-extraction from domain.",
+                "description": "Explicit brand name to monitor (e.g., 'Türkiye Finans'). Overrides auto-extraction from domain.",
                 "maxLength": 100
               },
               "keywords": {
                 "type": "string",
                 "title": "Additional Keywords",
-                "description": "Comma-separated extra keywords to include in brand monitoring (e.g., 'TKFIN, T\u00fcrk Finans Bankas\u0131').",
+                "description": "Comma-separated extra keywords to include in brand monitoring (e.g., 'TKFIN, Türk Finans Bankası').",
                 "maxLength": 500
               },
               "country": {
@@ -2676,7 +2704,7 @@
               "host": {
                 "type": "string",
                 "title": "Domain / Host",
-                "description": "Domain to monitor on dark web. Brand keyword is auto-extracted (e.g., huawei.com \u2192 'huawei'). Auto-filled from target."
+                "description": "Domain to monitor on dark web. Brand keyword is auto-extracted (e.g., huawei.com → 'huawei'). Auto-filled from target."
               },
               "keyword": {
                 "type": "string",
@@ -2687,7 +2715,7 @@
               "extraKeywords": {
                 "type": "string",
                 "title": "Additional Keywords",
-                "description": "Comma-separated extra keywords to also search on dark web (e.g., 'TKFIN, T\u00fcrk Finans').",
+                "description": "Comma-separated extra keywords to also search on dark web (e.g., 'TKFIN, Türk Finans').",
                 "maxLength": 500
               },
               "language": {
@@ -2903,8 +2931,8 @@
       "pricingTier": [
         "free"
       ],
-      "shortDescription": "Social media & news monitoring: Twitter, Telegram, Google News, Ek\u015fi S\u00f6zl\u00fck, NewsData.io",
-      "description": "Monitors Twitter/X, Telegram channels, Google News (via HasData SERP), Ek\u015fi S\u00f6zl\u00fck, and NewsData.io for brand mentions, threat intelligence, and sentiment analysis.",
+      "shortDescription": "Social media & news monitoring: Twitter, Telegram, Google News, Ekşi Sözlük, NewsData.io",
+      "description": "Monitors Twitter/X, Telegram channels, Google News (via HasData SERP), Ekşi Sözlük, and NewsData.io for brand mentions, threat intelligence, and sentiment analysis.",
       "agentTool": true,
       "capabilities": [
         {
@@ -2935,13 +2963,13 @@
               "aliases": {
                 "type": "string",
                 "title": "Aliases / Variants",
-                "description": "Comma-separated alternative names/spellings (e.g., 'TKFIN, T\u00fcrk Finans, Turkiye Finans'). Max 5 aliases.",
+                "description": "Comma-separated alternative names/spellings (e.g., 'TKFIN, Türk Finans, Turkiye Finans'). Max 5 aliases.",
                 "maxLength": 500
               },
               "language": {
                 "type": "string",
                 "title": "Language",
-                "description": "2-letter language code (tr, en, de...). Enables Ek\u015fi S\u00f6zl\u00fck when set to 'tr'. Affects news search language.",
+                "description": "2-letter language code (tr, en, de...). Enables Ekşi Sözlük when set to 'tr'. Affects news search language.",
                 "maxLength": 2,
                 "pattern": "^[a-z]{2}$"
               },
@@ -2974,7 +3002,7 @@
           "hasDataApiKey": {
             "type": "string",
             "title": "HasData API Key",
-            "description": "HasData.com API key for Google SERP scraping (used for news + Ek\u015fi S\u00f6zl\u00fck)."
+            "description": "HasData.com API key for Google SERP scraping (used for news + Ekşi Sözlük)."
           },
           "newsDataApiKey": {
             "type": "string",

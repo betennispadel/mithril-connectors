@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
-	httphelper "github.com/oasm-platform/oasm-connectors/sdk/http"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
+	httphelper "github.com/betennispadel/mithril-connectors/sdk/http"
 )
 
 // ZapAdapter runs OWASP ZAP via the Automation Framework and streams the
@@ -68,7 +68,9 @@ func (a *ZapAdapter) Execute(ctx context.Context, inputs map[string]any, out cha
 	}()
 
 	reportPath := filepath.Join(workDir, "report.json")
-	plan, err := buildAutomationPlan(target, cfg, reportPath)
+	authHeader, _ := inputs["auth_header"].(string)
+	authCookie, _ := inputs["auth_cookie"].(string)
+	plan, err := buildAutomationPlan(target, cfg, reportPath, authHeader, authCookie)
 	if err != nil {
 		return err
 	}

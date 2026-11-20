@@ -1,4 +1,4 @@
-module github.com/oasm-platform/oasm-connectors
+module github.com/betennispadel/mithril-connectors
 
 go 1.26.0
 

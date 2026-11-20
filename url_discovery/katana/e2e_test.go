@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // TestKatanaE2E_RealCrawl is the real-surface artifact: it crawls a live target

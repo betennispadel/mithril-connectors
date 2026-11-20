@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	httphelper "github.com/oasm-platform/oasm-connectors/sdk/http"
+	httphelper "github.com/betennispadel/mithril-connectors/sdk/http"
 )
 
 // niktoProxyArgs passes the proxy as -useproxy scheme://host:port. nikto takes

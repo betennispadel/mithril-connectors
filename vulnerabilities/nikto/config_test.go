@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 func TestLoadNiktoConfig_EmptyIsZeroConfig(t *testing.T) {

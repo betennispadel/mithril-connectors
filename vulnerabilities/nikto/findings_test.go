@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // TestParseRealNiktoStdout pins the parser against output captured from a real

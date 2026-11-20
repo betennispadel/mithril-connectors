@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 	"gopkg.in/yaml.v3"
 )
 
@@ -32,7 +32,7 @@ func TestLoadZapConfig_InvalidErrors(t *testing.T) {
 
 func parsePlan(t *testing.T, target string, cfg *zapConfig) zapPlan {
 	t.Helper()
-	raw, err := buildAutomationPlan(target, cfg, testReportPath)
+	raw, err := buildAutomationPlan(target, cfg, testReportPath, "", "")
 	if err != nil {
 		t.Fatalf("buildAutomationPlan: %v", err)
 	}
@@ -138,7 +138,7 @@ func TestZapHardTimeout_TracksBudgets(t *testing.T) {
 }
 
 func TestBuildAutomationPlan_InvalidScanMode(t *testing.T) {
-	if _, err := buildAutomationPlan("https://example.com", &zapConfig{ScanMode: "turbo"}, "/tmp/r.json"); err == nil {
+	if _, err := buildAutomationPlan("https://example.com", &zapConfig{ScanMode: "turbo"}, "/tmp/r.json", "", ""); err == nil {
 		t.Fatal("expected error for invalid scanMode")
 	}
 }

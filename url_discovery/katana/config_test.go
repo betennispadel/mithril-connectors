@@ -8,7 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 func TestLoadKatanaConfig_UnsetIsZeroConfig(t *testing.T) {

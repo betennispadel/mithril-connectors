@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // detailWorkers bounds how many per-vulnerability detail lookups run at once.

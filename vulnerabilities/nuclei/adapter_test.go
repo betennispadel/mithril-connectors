@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 	"github.com/projectdiscovery/nuclei/v3/pkg/model"
 	"github.com/projectdiscovery/nuclei/v3/pkg/model/types/severity"
 	nucleiOutput "github.com/projectdiscovery/nuclei/v3/pkg/output"

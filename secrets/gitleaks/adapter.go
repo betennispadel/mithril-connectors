@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
-	"github.com/oasm-platform/oasm-connectors/sdk/gitrepo"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/gitrepo"
 )
 
 // gitleaksConfig is the tool profile (configSchema in manifest.yaml).

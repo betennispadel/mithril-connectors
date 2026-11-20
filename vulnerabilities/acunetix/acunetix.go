@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
-	httphelper "github.com/oasm-platform/oasm-connectors/sdk/http"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
+	httphelper "github.com/betennispadel/mithril-connectors/sdk/http"
 )
 
 // defaultProfileID is the built-in "Full Scan" profile. A profile id is

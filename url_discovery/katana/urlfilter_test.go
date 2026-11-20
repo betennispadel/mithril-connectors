@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 func TestLoadKatanaConfig_ParsesUrlPatterns(t *testing.T) {

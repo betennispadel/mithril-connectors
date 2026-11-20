@@ -3,7 +3,7 @@ module connector-semgrep
 go 1.26.0
 
 require (
-	github.com/oasm-platform/oasm-connectors/sdk v0.0.0-20261116064756-b84f4807f613 // indirect
+	github.com/betennispadel/mithril-connectors/sdk v0.0.0-20261116064756-b84f4807f613 // indirect
 	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.44.0 // indirect

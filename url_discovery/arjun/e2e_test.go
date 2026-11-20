@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // TestArjunE2E_RealDiscovery is the real-surface artifact: it probes a live

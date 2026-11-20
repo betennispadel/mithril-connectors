@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	httphelper "github.com/oasm-platform/oasm-connectors/sdk/http"
+	httphelper "github.com/betennispadel/mithril-connectors/sdk/http"
 )
 
 // gauConfig mirrors manifest.yaml configSchema. Keys are camelCase to match the

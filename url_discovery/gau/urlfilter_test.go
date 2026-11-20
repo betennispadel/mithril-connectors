@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 func collectWithConfig(t *testing.T, config string) ([]connector.Finding, error) {

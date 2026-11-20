@@ -1,8 +1,8 @@
-module github.com/oasm-platform/oasm-connectors/vulnerabilities/nuclei
+module github.com/betennispadel/mithril-connectors/vulnerabilities/nuclei
 
 go 1.26.0
 
-require github.com/oasm-platform/oasm-connectors/sdk v0.0.0
+require github.com/betennispadel/mithril-connectors/sdk v0.0.0
 
 require (
 	github.com/projectdiscovery/hmap v0.0.101
@@ -401,6 +401,6 @@ require (
 	software.sslmate.com/src/go-pkcs12 v0.7.2 // indirect
 )
 
-replace github.com/oasm-platform/oasm-connectors/sdk => ../../sdk
+replace github.com/betennispadel/mithril-connectors/sdk => ../../sdk
 
 replace google.golang.org/genproto v0.0.0-20220706185917-7780775163c4 => google.golang.org/genproto v0.0.0-20260904194346-d0f1323225a4

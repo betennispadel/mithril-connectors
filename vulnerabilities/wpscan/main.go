@@ -1,5 +1,5 @@
 package main
 
-import "github.com/oasm-platform/oasm-connectors/sdk/runtime"
+import "github.com/betennispadel/mithril-connectors/sdk/runtime"
 
 func main() { runtime.Main("wpscan", WpscanAdapter{}) }

@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // leak is one entry of a gitleaks JSON report (`--report-format json`). Only

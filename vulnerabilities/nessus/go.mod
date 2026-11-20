@@ -1,10 +1,10 @@
-module github.com/oasm-platform/oasm-connectors/vulnerabilities/nessus
+module github.com/betennispadel/mithril-connectors/vulnerabilities/nessus
 
 go 1.26.0
 
 require (
 	github.com/hashicorp/go-retryablehttp v0.7.8
-	github.com/oasm-platform/oasm-connectors/sdk v0.0.0
+	github.com/betennispadel/mithril-connectors/sdk v0.0.0
 	github.com/tencat-dev/nessus-client-go v0.1.5-0.20260906084052-775e34ddb8db
 )
 
@@ -28,4 +28,4 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
-replace github.com/oasm-platform/oasm-connectors/sdk => ../../sdk
+replace github.com/betennispadel/mithril-connectors/sdk => ../../sdk

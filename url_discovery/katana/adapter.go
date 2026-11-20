@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oasm-platform/oasm-connectors/sdk/connector"
+	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
 // katanaHardTimeout bounds the whole katana process. katana's -timeout is a
