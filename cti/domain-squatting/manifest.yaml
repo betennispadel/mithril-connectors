@@ -1,0 +1,75 @@
+name: Polyjuice
+slug: polyjuice
+version: 1.0.0
+image: connector-polyjuice:1.0.0
+author: custom
+pricingTier: [free]
+shortDescription: Domain squatting detection powered by openSquat
+description: Detects typosquatting, phishing, IDN homograph, doppelgänger and bitsquatting domains targeting your brand using newly registered domain (NRD) feeds and Levenshtein distance matching.
+agentTool: true
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [domain]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      required: [host]
+      properties:
+        host:
+          type: string
+          title: Domain
+          description: Target domain to monitor for squatting. Auto-filled from target.
+        keywords:
+          type: string
+          title: Additional Keywords
+          description: "Comma-separated brand names or keywords to monitor (e.g. mybrand,myproduct)"
+          maxLength: 1000
+    configSchema:
+      type: object
+      properties:
+        confidenceLevel:
+          type: integer
+          title: Confidence Level
+          description: "0=very high (fewer results), 1=high (default), 2=medium, 3=low, 4=very low (more results)"
+          default: 1
+          minimum: 0
+          maximum: 4
+        dnsValidation:
+          type: boolean
+          title: DNS Validation
+          description: Validate discovered domains via Quad9 DNS
+          default: true
+        ctLogs:
+          type: boolean
+          title: Certificate Transparency Logs
+          description: Scan certificate transparency logs for suspicious certificates
+          default: false
+        portCheck:
+          type: boolean
+          title: Port Check
+          description: Check for open ports (80/443) on discovered domains
+          default: false
+        subdomains:
+          type: boolean
+          title: Check Subdomains
+          description: Also check subdomains of discovered domains
+          default: false
+        opensquatApiKey:
+          type: string
+          title: openSquat API Key
+          description: Optional API key for premium NRD feed access
+          format: password
+        virusTotalKey:
+          type: string
+          title: VirusTotal API Key
+          description: Optional VirusTotal key for domain reputation checking
+          format: password
+        maxFindings:
+          type: integer
+          title: Max Findings
+          default: 500
+resourceDefaults:
+  cpu: 500m
+  memory: 512Mi
+  timeoutSeconds: 900

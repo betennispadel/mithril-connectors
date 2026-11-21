@@ -8,6 +8,7 @@ use (
 	./cti/ioc-feed
 	./cti/social-monitor
 	./cti/supplier-risk
+	./cti/domain-squatting
 	./ports_scanner/nmap
 	./ports_scanner/rustscan
 	./sast/semgrep
@@ -25,4 +26,5 @@ use (
 	./vulnerabilities/nuclei
 	./vulnerabilities/wpscan
 	./vulnerabilities/zap
+	./phishing_simulation/gophish
 )
