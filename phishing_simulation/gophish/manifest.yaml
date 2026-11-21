@@ -1,0 +1,115 @@
+name: Imperius
+slug: imperius
+version: "0.12.1"
+image: ghcr.io/betennispadel/connector-imperius:0.12.1
+author: "mithril"
+pricingTier: [free]
+egress: direct
+homepage: "https://getgophish.com"
+repositoryUrl: "https://github.com/betennispadel/mithril-connectors"
+supportUrl: "https://github.com/betennispadel/mithril-connectors/issues"
+shortDescription: "Phishing simulation and security awareness testing"
+description: >
+  Runs automated phishing simulation campaigns against target email addresses
+  using GoPhish. Measures email open rates, click-through rates, credential
+  submission rates, and reporting rates. Produces findings indicating
+  organizational phishing susceptibility and social engineering risk. Supports
+  customizable email templates, landing pages, and SMTP configuration.
+capabilities:
+  - name: phishing_simulation
+    targetTypes: [domain]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      required: [target]
+      properties:
+        target:
+          type: string
+          title: Target domain
+          description: "Domain to run phishing simulation against"
+          examples: ["example.com"]
+          ui:placeholder: "example.com"
+        recipients:
+          type: string
+          title: Recipients
+          description: "Comma-separated list of email addresses or CSV rows (email,first_name,last_name,position)"
+          examples: ["john@example.com,John,Doe,Engineer;jane@example.com,Jane,Smith,Manager"]
+      additionalProperties: false
+agentTool: true
+configSchema:
+  type: object
+  additionalProperties: false
+  properties:
+    smtpHost:
+      type: string
+      title: SMTP Host
+      description: "SMTP relay host:port for sending phishing emails"
+      examples: ["smtp.gmail.com:587"]
+    smtpUser:
+      type: string
+      title: SMTP Username
+      description: "SMTP authentication username"
+    smtpPass:
+      type: string
+      title: SMTP Password
+      description: "SMTP authentication password"
+      ui:widget: "password"
+    fromAddress:
+      type: string
+      title: From Address
+      description: "Sender email address for phishing emails"
+      examples: ["security-test@company.com"]
+    templatePreset:
+      type: string
+      title: Email Template Preset
+      description: "Built-in email template to use"
+      default: "password-reset"
+      enum: ["password-reset", "it-helpdesk", "ceo-urgent", "mfa-verify"]
+    customTemplateSubject:
+      type: string
+      title: Custom Email Subject
+      description: "Override subject line (leave empty for preset default)"
+    customTemplateHTML:
+      type: string
+      title: Custom Email HTML
+      description: "Override email body HTML. Use {{.FirstName}}, {{.LastName}}, {{.Email}}, {{.URL}} placeholders"
+    landingPreset:
+      type: string
+      title: Landing Page Preset
+      description: "Built-in landing page template"
+      default: "generic-login"
+      enum: ["generic-login", "o365-login", "google-login"]
+    captureCredentials:
+      type: boolean
+      title: Capture Credentials
+      description: "Whether to capture submitted usernames on the landing page"
+      default: true
+    capturePasswords:
+      type: boolean
+      title: Capture Passwords
+      description: "Whether to capture submitted passwords (use with caution)"
+      default: false
+    redirectURL:
+      type: string
+      title: Redirect URL
+      description: "URL to redirect users to after landing page submission"
+      examples: ["https://company.com/security-awareness"]
+    campaignDurationMinutes:
+      type: integer
+      title: Campaign Duration (minutes)
+      description: "How long to run the campaign before collecting results"
+      default: 60
+      minimum: 5
+      maximum: 1440
+    pollIntervalSeconds:
+      type: integer
+      title: Poll Interval (seconds)
+      description: "How often to check campaign progress"
+      default: 30
+      minimum: 10
+      maximum: 300
+resourceDefaults:
+  cpu: 500m
+  memory: 512Mi
+  timeoutSeconds: 7200
