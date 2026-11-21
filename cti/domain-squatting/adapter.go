@@ -19,8 +19,7 @@ type PolyjuiceConfig struct {
 	CTLogs          bool   `json:"ctLogs"`
 	PortCheck       bool   `json:"portCheck"`
 	Subdomains      bool   `json:"subdomains"`
-	OpenSquatAPIKey string `json:"opensquatApiKey"`
-	VirusTotalKey   string `json:"virusTotalKey"`
+	VirusTotalKey string `json:"virusTotalKey"`
 	MaxFindings     int    `json:"maxFindings"`
 }
 
@@ -101,7 +100,6 @@ func (PolyjuiceAdapter) Execute(ctx context.Context, inputs map[string]any, out 
 	}
 
 	outputFile := filepath.Join(workDir, "results.json")
-	useAPIMode := cfg.OpenSquatAPIKey != ""
 
 	args := []string{
 		"-k", keywordsFile,
@@ -110,9 +108,6 @@ func (PolyjuiceAdapter) Execute(ctx context.Context, inputs map[string]any, out 
 		"-c", fmt.Sprintf("%d", cfg.ConfidenceLevel),
 	}
 
-	if useAPIMode {
-		args = append(args, "--api", "--api-key", cfg.OpenSquatAPIKey)
-	}
 	if cfg.DNSValidation {
 		args = append(args, "--dns")
 	}

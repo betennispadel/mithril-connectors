@@ -55,11 +55,6 @@ capabilities:
           title: Check Subdomains
           description: Also check subdomains of discovered domains
           default: false
-        opensquatApiKey:
-          type: string
-          title: openSquat API Key
-          description: Optional API key for premium NRD feed access
-          format: password
         virusTotalKey:
           type: string
           title: VirusTotal API Key
