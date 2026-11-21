@@ -9,6 +9,7 @@ use (
 	./cti/social-monitor
 	./cti/supplier-risk
 	./cti/domain-squatting
+	./cti/pensieve
 	./ports_scanner/nmap
 	./ports_scanner/rustscan
 	./sast/semgrep

@@ -1,0 +1,82 @@
+name: Pensieve
+slug: pensieve
+version: 1.0.0
+image: connector-pensieve:1.0.0
+author: custom
+pricingTier: [free]
+shortDescription: Unified CTI engine — dark web, data leaks, IOC feeds, brand protection, fraud intelligence
+description: Comprehensive threat intelligence powered by VoidAccess + LeakRadar + 10 specialized sources. Supports 16 target types including domain, IP, email, username, crypto wallet, and threat actor tracking.
+agentTool: true
+capabilities:
+  - name: vulnerabilities
+    targetTypes: [domain]
+    inputs: [host]
+    produces: [vulnerability]
+    inputsSchema:
+      type: object
+      required: [target, ctiTargetType]
+      properties:
+        target:
+          type: string
+          title: Target Value
+          description: The value to investigate (domain, email, IP, keyword, etc.)
+        ctiTargetType:
+          type: string
+          title: CTI Target Type
+          description: Type of the target being investigated
+          enum:
+            - DOMAIN
+            - IP
+            - URL
+            - ONION
+            - EMAIL
+            - USERNAME
+            - PHONE
+            - FILE_HASH
+            - CRYPTO_WALLET
+            - ASN
+            - THREAT_ACTOR
+            - ORGANIZATION
+            - CVE
+            - KEYWORD
+            - TELEGRAM_CHANNEL
+            - APP_PACKAGE
+    configSchema:
+      type: object
+      properties:
+        leakRadarApiKey:
+          type: string
+          title: LeakRadar API Key
+          format: password
+        hudsonRockApiKey:
+          type: string
+          title: Hudson Rock API Key
+          format: password
+        twitterBearerToken:
+          type: string
+          title: Twitter Bearer Token
+          format: password
+        hasDataApiKey:
+          type: string
+          title: HasData API Key
+          format: password
+        newsDataApiKey:
+          type: string
+          title: NewsData.io API Key
+          format: password
+        openSanctionsApiKey:
+          type: string
+          title: OpenSanctions API Key
+          format: password
+        virusTotalKey:
+          type: string
+          title: VirusTotal API Key
+          format: password
+        maxFindings:
+          type: integer
+          title: Max Findings
+          default: 1000
+resourceDefaults:
+  cpu: "1"
+  memory: 1Gi
+  timeoutSeconds: 1800
