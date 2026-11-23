@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -17,6 +19,189 @@ import (
 func runBrandProtection(ctx context.Context, cfg *PensieveConfig, target string, em *emitter) {
 	runOpenPhish(ctx, target, em)
 	runTyposquat(ctx, target, em)
+	runOpenSquat(ctx, cfg, target, em)
+}
+
+// runOpenSquat calls the opensquat Python tool for advanced domain squatting detection.
+// It handles IDN homograph attacks, CT log monitoring, VirusTotal checks,
+// and newly registered domain matching that the simple typosquat generator misses.
+func runOpenSquat(ctx context.Context, cfg *PensieveConfig, target string, em *emitter) {
+	domain := strings.TrimPrefix(strings.TrimPrefix(target, "http://"), "https://")
+	parts := strings.SplitN(domain, ".", 2)
+	if len(parts) < 2 {
+		return
+	}
+	brandName := parts[0]
+
+	// Build keywords list
+	keywords := []string{brandName}
+
+	// Create temp workdir
+	workDir, err := os.MkdirTemp("", "opensquat-*")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "opensquat: failed to create workdir: %v\n", err)
+		return
+	}
+	defer os.RemoveAll(workDir)
+
+	keywordsFile := filepath.Join(workDir, "keywords.txt")
+	if err := os.WriteFile(keywordsFile, []byte(strings.Join(keywords, "\n")), 0644); err != nil {
+		fmt.Fprintf(os.Stderr, "opensquat: failed to write keywords: %v\n", err)
+		return
+	}
+
+	outputFile := filepath.Join(workDir, "results.json")
+
+	args := []string{
+		"-k", keywordsFile,
+		"-o", outputFile,
+		"-t", "json",
+		"-c", "1",
+		"--dns",
+	}
+
+	if cfg.VirusTotalKey != "" {
+		args = append(args, "--vt")
+		vtFile := filepath.Join(workDir, "vt_key.txt")
+		os.WriteFile(vtFile, []byte(cfg.VirusTotalKey), 0600)
+	}
+
+	cmd := exec.CommandContext(ctx, "opensquat", args...)
+	cmd.Dir = workDir
+	cmd.Env = append(os.Environ(), fmt.Sprintf("HOME=%s", workDir))
+
+	cmdOutput, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "opensquat warning: %v\noutput: %s\n", err, string(cmdOutput))
+	}
+
+	data, err := os.ReadFile(outputFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "opensquat: failed to read results: %v\n", err)
+		return
+	}
+
+	// Try API-style JSON output
+	var apiResults []openSquatResult
+	if json.Unmarshal(data, &apiResults) == nil && len(apiResults) > 0 {
+		for _, r := range apiResults {
+			for _, d := range r.Domains {
+				severity := classifyOpenSquatSeverity(d, domain)
+				name := fmt.Sprintf("Domain Squatting: %s", d.Domain)
+				desc := fmt.Sprintf("Suspicious domain '%s' targeting keyword '%s'.", d.Domain, r.Keyword)
+				if d.IDN {
+					desc += fmt.Sprintf(" IDN homograph attack - renders as '%s'.", d.Unicode)
+					name = fmt.Sprintf("IDN Homograph: %s -> %s", d.Domain, d.Unicode)
+				}
+				if d.Date != "" {
+					desc += fmt.Sprintf(" Registered: %s.", d.Date)
+				}
+
+				tags := []string{"brand-protection", "pensieve", "opensquat", r.Keyword}
+				if d.IDN {
+					tags = append(tags, "idn-homograph")
+				}
+
+				if !em.emit(connector.Finding{
+					Name:        name,
+					Severity:    severity,
+					Description: desc,
+					MatchedAt:   d.Domain,
+					Tags:        tags,
+					References:  []string{fmt.Sprintf("https://www.whois.com/whois/%s", d.Domain)},
+					Fingerprint: fingerprint("pensieve", "opensquat", d.Domain),
+				}) {
+					return
+				}
+			}
+		}
+		return
+	}
+
+	// Fallback: community-style JSON (array of strings)
+	var communityResults []string
+	if json.Unmarshal(data, &communityResults) == nil {
+		for _, d := range communityResults {
+			d = strings.TrimSpace(d)
+			if d == "" || d == domain {
+				continue
+			}
+			if !em.emit(connector.Finding{
+				Name:        fmt.Sprintf("Domain Squatting: %s", d),
+				Severity:    "high",
+				Description: fmt.Sprintf("Newly registered domain '%s' resembles '%s' - potential typosquatting or phishing.", d, domain),
+				MatchedAt:   d,
+				Tags:        []string{"brand-protection", "pensieve", "opensquat"},
+				References:  []string{fmt.Sprintf("https://www.whois.com/whois/%s", d)},
+				Fingerprint: fingerprint("pensieve", "opensquat", d),
+			}) {
+				return
+			}
+		}
+	}
+}
+
+type openSquatResult struct {
+	Keyword string            `json:"keyword"`
+	Domains []openSquatDomain `json:"domains"`
+}
+
+type openSquatDomain struct {
+	Domain  string `json:"domain"`
+	TLD     string `json:"tld"`
+	Date    string `json:"date"`
+	IDN     bool   `json:"idn"`
+	Unicode string `json:"unicode"`
+}
+
+func classifyOpenSquatSeverity(d openSquatDomain, targetDomain string) string {
+	if d.IDN {
+		return "critical"
+	}
+	target := strings.Split(targetDomain, ".")[0]
+	domainName := strings.Split(d.Domain, ".")[0]
+	dist := levenshteinDistance(target, domainName)
+	if dist <= 1 {
+		return "critical"
+	}
+	if dist <= 2 {
+		return "high"
+	}
+	return "medium"
+}
+
+func levenshteinDistance(a, b string) int {
+	a = strings.ToLower(a)
+	b = strings.ToLower(b)
+	la, lb := len(a), len(b)
+	dp := make([][]int, la+1)
+	for i := range dp {
+		dp[i] = make([]int, lb+1)
+		dp[i][0] = i
+	}
+	for j := 0; j <= lb; j++ {
+		dp[0][j] = j
+	}
+	for i := 1; i <= la; i++ {
+		for j := 1; j <= lb; j++ {
+			cost := 1
+			if a[i-1] == b[j-1] {
+				cost = 0
+			}
+			m1 := dp[i-1][j] + 1
+			m2 := dp[i][j-1] + 1
+			m3 := dp[i-1][j-1] + cost
+			if m1 < m2 {
+				dp[i][j] = m1
+			} else {
+				dp[i][j] = m2
+			}
+			if m3 < dp[i][j] {
+				dp[i][j] = m3
+			}
+		}
+	}
+	return dp[la][lb]
 }
 
 func runOpenPhish(ctx context.Context, target string, em *emitter) {
