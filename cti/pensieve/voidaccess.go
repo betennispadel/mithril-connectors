@@ -75,6 +75,15 @@ func (c *VoidAccessClient) Investigate(ctx context.Context, query string) (*Void
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 
+	// Initialize SQLite schema before running CLI
+	initCmd := exec.CommandContext(ctx, "python", "-c",
+		"from db import Base, get_engine; Base.metadata.create_all(get_engine())")
+	initCmd.Env = cmd.Env
+	initCmd.Dir = workDir
+	if initOut, initErr := initCmd.CombinedOutput(); initErr != nil {
+		fmt.Fprintf(os.Stderr, "voidaccess: db init warning: %v %s\n", initErr, string(initOut))
+	}
+
 	fmt.Fprintf(os.Stderr, "voidaccess: running investigate %q\n", query)
 	start := time.Now()
 
