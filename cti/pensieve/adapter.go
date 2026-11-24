@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"sync"
 
 	"github.com/betennispadel/mithril-connectors/sdk/connector"
@@ -27,20 +26,16 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	targetType := strInput(inputs, "ctiTargetType")
 	em := newEmitter(ctx, out, cfg.MaxFindings)
 
-	// Start VoidAccess sidecar
-	va, err := startVoidAccess(ctx)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "VoidAccess sidecar failed to start: %v — continuing with direct adapters only\n", err)
-	} else {
-		defer va.Stop()
-	}
+	// VoidAccess CLI client for dark web intelligence
+	va := newVoidAccessClient()
+	defer va.Stop()
 
 	var wg sync.WaitGroup
 
 	// Route to sub-adapters based on target type
 	switch targetType {
 	case "DOMAIN":
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
@@ -54,7 +49,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runIOCDomain(ctx, cfg, target, em) }()
 
 	case "IP":
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
@@ -70,13 +65,13 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 			wg.Add(1)
 			go func() { defer wg.Done(); runHudsonRock(ctx, cfg, target, em) }()
 		}
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
 
 	case "USERNAME":
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
@@ -86,7 +81,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		}
 
 	case "KEYWORD":
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
@@ -106,7 +101,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		}
 
 	case "CRYPTO_WALLET":
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
@@ -118,13 +113,13 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 			wg.Add(1)
 			go func() { defer wg.Done(); runSanctions(ctx, cfg, target, em) }()
 		}
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
 
 	case "THREAT_ACTOR":
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
@@ -132,7 +127,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runRansomware(ctx, cfg, target, em) }()
 
 	case "FILE_HASH":
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
@@ -140,7 +135,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runIOCHash(ctx, cfg, target, em) }()
 
 	case "CVE":
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
@@ -150,7 +145,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runTelegram(ctx, cfg, target, em) }()
 
 	case "URL", "ONION":
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
@@ -158,13 +153,13 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runBrandProtection(ctx, cfg, target, em) }()
 
 	case "PHONE":
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
 
 	case "ASN":
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}
@@ -177,7 +172,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 
 	default:
 		// Fallback: at least try VoidAccess darkweb
-		if va != nil {
+		if true {
 			wg.Add(1)
 			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
 		}

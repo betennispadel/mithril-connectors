@@ -4,22 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
-const voidAccessPort = "8099"
-const voidAccessBase = "http://127.0.0.1:" + voidAccessPort
-
-type VoidAccessClient struct {
-	baseURL string
-	client  *http.Client
-	cmd     *exec.Cmd
-}
+// VoidAccessClient wraps the voidaccess CLI tool.
+// Instead of an API server, it shells out to `voidaccess investigate`
+// and parses the JSON output file.
+type VoidAccessClient struct{}
 
 type VoidAccessEntity struct {
 	ID          string                 `json:"id"`
@@ -40,115 +35,86 @@ type VoidAccessRelation struct {
 }
 
 type VoidAccessInvestigation struct {
-	ID       string `json:"id"`
-	Status   string `json:"status"`
-	Query    string `json:"query"`
-	Entities []VoidAccessEntity `json:"entities"`
+	ID            string             `json:"id"`
+	Status        string             `json:"status"`
+	Query         string             `json:"query"`
+	Summary       string             `json:"summary"`
+	Entities      []VoidAccessEntity `json:"entities"`
+	Relationships []map[string]any   `json:"relationships"`
 }
 
-func startVoidAccess(ctx context.Context) (*VoidAccessClient, error) {
-	cmd := exec.CommandContext(ctx, "python", "-m", "voidaccess.api",
-		"--port", voidAccessPort,
-		"--host", "127.0.0.1",
+func newVoidAccessClient() *VoidAccessClient {
+	return &VoidAccessClient{}
+}
+
+func (c *VoidAccessClient) Investigate(ctx context.Context, query string) (*VoidAccessInvestigation, error) {
+	workDir, err := os.MkdirTemp("", "voidaccess-*")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create workdir: %w", err)
+	}
+	defer os.RemoveAll(workDir)
+
+	outputDir := filepath.Join(workDir, "results")
+	os.MkdirAll(outputDir, 0755)
+
+	args := []string{
+		"investigate", query,
+		"--output", outputDir,
+		"--no-tor",
+		"--format", "json",
+	}
+
+	cmd := exec.CommandContext(ctx, "voidaccess", args...)
+	cmd.Dir = workDir
+	cmd.Env = append(os.Environ(),
+		"DATABASE_URL=sqlite:///"+filepath.Join(workDir, "va.db"),
+		"HOME="+workDir,
+		"VOIDACCESS_DISABLE_QUEUE_WORKER=true",
 	)
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 
-	if err := cmd.Start(); err != nil {
-		return nil, fmt.Errorf("failed to start VoidAccess: %w", err)
+	fmt.Fprintf(os.Stderr, "voidaccess: running investigate %q\n", query)
+	start := time.Now()
+
+	if err := cmd.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "voidaccess: command failed after %v: %v\n", time.Since(start), err)
+		// Don't return error — try to read partial results
+	} else {
+		fmt.Fprintf(os.Stderr, "voidaccess: completed in %v\n", time.Since(start))
 	}
 
-	client := &VoidAccessClient{
-		baseURL: voidAccessBase,
-		client:  &http.Client{Timeout: 300 * time.Second},
-		cmd:     cmd,
-	}
-
-	// Wait for health check
-	deadline := time.Now().Add(60 * time.Second)
-	for time.Now().Before(deadline) {
-		resp, err := client.client.Get(client.baseURL + "/api/status")
-		if err == nil && resp.StatusCode == 200 {
-			resp.Body.Close()
-			return client, nil
-		}
-		if resp != nil {
-			resp.Body.Close()
-		}
-		select {
-		case <-ctx.Done():
-			cmd.Process.Kill()
-			return nil, ctx.Err()
-		case <-time.After(2 * time.Second):
-		}
-	}
-
-	cmd.Process.Kill()
-	return nil, fmt.Errorf("VoidAccess failed to start within 60s")
-}
-
-func (c *VoidAccessClient) Investigate(ctx context.Context, query string) (*VoidAccessInvestigation, error) {
-	body := fmt.Sprintf(`{"query": %q}`, query)
-	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/api/investigations", strings.NewReader(body))
+	// Find the JSON output file
+	entries, err := os.ReadDir(outputDir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read output dir: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := c.client.Do(req)
+	var jsonFile string
+	for _, e := range entries {
+		if strings.HasSuffix(e.Name(), ".json") {
+			jsonFile = filepath.Join(outputDir, e.Name())
+			break
+		}
+	}
+
+	if jsonFile == "" {
+		return nil, fmt.Errorf("no JSON output file found in %s", outputDir)
+	}
+
+	data, err := os.ReadFile(jsonFile)
 	if err != nil {
-		return nil, fmt.Errorf("VoidAccess investigate request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	data, _ := io.ReadAll(resp.Body)
-	if resp.StatusCode != 200 && resp.StatusCode != 201 {
-		return nil, fmt.Errorf("VoidAccess returned %d: %s", resp.StatusCode, string(data))
+		return nil, fmt.Errorf("failed to read results: %w", err)
 	}
 
 	var inv VoidAccessInvestigation
 	if err := json.Unmarshal(data, &inv); err != nil {
-		return nil, fmt.Errorf("failed to parse investigation: %w", err)
+		return nil, fmt.Errorf("failed to parse results: %w", err)
 	}
-
-	// Poll until completed
-	for inv.Status == "pending" || inv.Status == "running" {
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		case <-time.After(3 * time.Second):
-		}
-
-		req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/api/investigations/%s", c.baseURL, inv.ID), nil)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.client.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		data, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		if err := json.Unmarshal(data, &inv); err != nil {
-			return nil, err
-		}
-	}
-
-	// Fetch entities
-	req2, _ := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/api/investigations/%s/entities", c.baseURL, inv.ID), nil)
-	resp2, err := c.client.Do(req2)
-	if err != nil {
-		return &inv, nil
-	}
-	defer resp2.Body.Close()
-	data2, _ := io.ReadAll(resp2.Body)
-	json.Unmarshal(data2, &inv.Entities)
 
 	return &inv, nil
 }
 
 func (c *VoidAccessClient) Stop() {
-	if c.cmd != nil && c.cmd.Process != nil {
-		c.cmd.Process.Kill()
-	}
+	// No-op for CLI-based client
 }
