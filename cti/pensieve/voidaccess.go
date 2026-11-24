@@ -60,7 +60,6 @@ func (c *VoidAccessClient) Investigate(ctx context.Context, query string, cfg *P
 	args := []string{
 		"investigate", query,
 		"--output", outputDir,
-		"--no-tor",
 		"--no-llm",
 		"--format", "json",
 	}
