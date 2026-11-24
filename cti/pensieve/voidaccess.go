@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -90,6 +91,33 @@ func (c *VoidAccessClient) Investigate(ctx context.Context, query string, cfg *P
 	initCmd.Dir = workDir
 	if initOut, initErr := initCmd.CombinedOutput(); initErr != nil {
 		fmt.Fprintf(os.Stderr, "voidaccess: db init warning: %v %s\n", initErr, string(initOut))
+	}
+
+	// Start Tor daemon so VoidAccess can reach .onion sites
+	torDataDir := filepath.Join(workDir, "tor-data")
+	os.MkdirAll(torDataDir, 0700)
+	torCmd := exec.CommandContext(ctx, "tor",
+		"--RunAsDaemon", "0",
+		"--SocksPort", "9050",
+		"--DataDirectory", torDataDir,
+		"--Log", "warn stderr",
+	)
+	torCmd.Stdout = os.Stderr
+	torCmd.Stderr = os.Stderr
+	torCmd.Env = cmd.Env
+	if torErr := torCmd.Start(); torErr != nil {
+		fmt.Fprintf(os.Stderr, "voidaccess: tor start warning: %v\n", torErr)
+	} else {
+		defer torCmd.Process.Kill()
+		for i := 0; i < 30; i++ {
+			conn, dialErr := net.DialTimeout("tcp", "127.0.0.1:9050", time.Second)
+			if dialErr == nil {
+				conn.Close()
+				fmt.Fprintf(os.Stderr, "voidaccess: tor ready\n")
+				break
+			}
+			time.Sleep(2 * time.Second)
+		}
 	}
 
 	fmt.Fprintf(os.Stderr, "voidaccess: running investigate %q\n", query)
