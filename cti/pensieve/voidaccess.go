@@ -96,12 +96,25 @@ func (c *VoidAccessClient) Investigate(ctx context.Context, query string, cfg *P
 	// Start Tor daemon so VoidAccess can reach .onion sites
 	torDataDir := filepath.Join(workDir, "tor-data")
 	os.MkdirAll(torDataDir, 0700)
-	torCmd := exec.CommandContext(ctx, "tor",
+
+	// Build torrc with proxy config if HTTPS_PROXY is set (internal Docker network)
+	torArgs := []string{
 		"--RunAsDaemon", "0",
 		"--SocksPort", "9050",
 		"--DataDirectory", torDataDir,
-		"--Log", "warn stderr",
-	)
+		"--Log", "notice stderr",
+	}
+	if httpsProxy := os.Getenv("HTTPS_PROXY"); httpsProxy != "" {
+		torrcPath := filepath.Join(workDir, "torrc")
+		torrcContent := buildTorrc(httpsProxy)
+		if torrcContent != "" {
+			os.WriteFile(torrcPath, []byte(torrcContent), 0600)
+			torArgs = append(torArgs, "-f", torrcPath)
+			fmt.Fprintf(os.Stderr, "voidaccess: tor using HTTPS proxy for bootstrap\n")
+		}
+	}
+
+	torCmd := exec.CommandContext(ctx, "tor", torArgs...)
 	torCmd.Stdout = os.Stderr
 	torCmd.Stderr = os.Stderr
 	torCmd.Env = cmd.Env
@@ -109,14 +122,15 @@ func (c *VoidAccessClient) Investigate(ctx context.Context, query string, cfg *P
 		fmt.Fprintf(os.Stderr, "voidaccess: tor start warning: %v\n", torErr)
 	} else {
 		defer torCmd.Process.Kill()
-		for i := 0; i < 30; i++ {
+		// Wait up to 60s for Tor to bootstrap (proxy route may be slower)
+		for i := 0; i < 60; i++ {
 			conn, dialErr := net.DialTimeout("tcp", "127.0.0.1:9050", time.Second)
 			if dialErr == nil {
 				conn.Close()
 				fmt.Fprintf(os.Stderr, "voidaccess: tor ready\n")
 				break
 			}
-			time.Sleep(2 * time.Second)
+			time.Sleep(time.Second)
 		}
 	}
 
@@ -159,6 +173,40 @@ func (c *VoidAccessClient) Investigate(ctx context.Context, query string, cfg *P
 	}
 
 	return &inv, nil
+}
+
+// buildTorrc parses an HTTP(S) proxy URL and returns torrc content
+// with HTTPSProxy directives so Tor can bootstrap through egress proxy.
+// Proxy URL format: http://token@host:port or http://user:pass@host:port
+func buildTorrc(proxyURL string) string {
+	u := strings.TrimPrefix(proxyURL, "http://")
+	u = strings.TrimPrefix(u, "https://")
+
+	var userInfo, hostPort string
+	if at := strings.LastIndex(u, "@"); at >= 0 {
+		userInfo = u[:at]
+		hostPort = u[at+1:]
+	} else {
+		hostPort = u
+	}
+
+	hostPort = strings.TrimRight(hostPort, "/")
+	if hostPort == "" {
+		return ""
+	}
+
+	lines := []string{
+		"HTTPSProxy " + hostPort,
+	}
+
+	if userInfo != "" {
+		if !strings.Contains(userInfo, ":") {
+			userInfo = userInfo + ":x"
+		}
+		lines = append(lines, "HTTPSProxyAuthenticator "+userInfo)
+	}
+
+	return strings.Join(lines, "\n") + "\n"
 }
 
 func (c *VoidAccessClient) Stop() {
