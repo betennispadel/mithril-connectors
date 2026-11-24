@@ -8,8 +8,8 @@ import (
 	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
-func runDarkweb(ctx context.Context, va *VoidAccessClient, target string, em *emitter) {
-	inv, err := va.Investigate(ctx, target)
+func runDarkweb(ctx context.Context, va *VoidAccessClient, cfg *PensieveConfig, target string, em *emitter) {
+	inv, err := va.Investigate(ctx, target, cfg)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "VoidAccess darkweb error: %v\n", err)
 		return

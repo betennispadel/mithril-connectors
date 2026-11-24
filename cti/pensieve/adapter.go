@@ -37,7 +37,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "DOMAIN":
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 		if cfg.LeakRadarApiKey != "" {
 			wg.Add(1)
@@ -51,7 +51,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "IP":
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 		wg.Add(1)
 		go func() { defer wg.Done(); runIOCIP(ctx, cfg, target, em) }()
@@ -67,13 +67,13 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		}
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 
 	case "USERNAME":
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 		if cfg.LeakRadarApiKey != "" {
 			wg.Add(1)
@@ -83,7 +83,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "KEYWORD":
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 		if cfg.TwitterBearerToken != "" {
 			wg.Add(1)
@@ -103,7 +103,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "CRYPTO_WALLET":
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 		wg.Add(1)
 		go func() { defer wg.Done(); runCrypto(ctx, cfg, target, em) }()
@@ -115,13 +115,13 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		}
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 
 	case "THREAT_ACTOR":
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 		wg.Add(1)
 		go func() { defer wg.Done(); runRansomware(ctx, cfg, target, em) }()
@@ -129,7 +129,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "FILE_HASH":
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 		wg.Add(1)
 		go func() { defer wg.Done(); runIOCHash(ctx, cfg, target, em) }()
@@ -137,7 +137,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "CVE":
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 
 	case "TELEGRAM_CHANNEL":
@@ -147,7 +147,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "URL", "ONION":
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 		wg.Add(1)
 		go func() { defer wg.Done(); runBrandProtection(ctx, cfg, target, em) }()
@@ -155,13 +155,13 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "PHONE":
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 
 	case "ASN":
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 
 	case "APP_PACKAGE":
@@ -174,7 +174,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		// Fallback: at least try VoidAccess darkweb
 		if true {
 			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, target, em) }()
+			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		}
 	}
 

@@ -47,7 +47,7 @@ func newVoidAccessClient() *VoidAccessClient {
 	return &VoidAccessClient{}
 }
 
-func (c *VoidAccessClient) Investigate(ctx context.Context, query string) (*VoidAccessInvestigation, error) {
+func (c *VoidAccessClient) Investigate(ctx context.Context, query string, cfg *PensieveConfig) (*VoidAccessInvestigation, error) {
 	workDir, err := os.MkdirTemp("", "voidaccess-*")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create workdir: %w", err)
@@ -72,6 +72,15 @@ func (c *VoidAccessClient) Investigate(ctx context.Context, query string) (*Void
 		"HOME="+workDir,
 		"VOIDACCESS_DISABLE_QUEUE_WORKER=true",
 	)
+	// Map Pensieve config keys to VoidAccess env vars
+	if cfg != nil {
+		if cfg.VirusTotalKey != "" {
+			cmd.Env = append(cmd.Env, "VT_API_KEY="+cfg.VirusTotalKey)
+		}
+		if cfg.HudsonRockApiKey != "" {
+			cmd.Env = append(cmd.Env, "HIBP_API_KEY="+cfg.HudsonRockApiKey)
+		}
+	}
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 
