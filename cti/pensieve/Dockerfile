@@ -16,7 +16,7 @@ RUN CGO_ENABLED=0 go build -o /connector .
 # ── Runtime ────────────────────────────────────────────────────────────────────
 FROM python:3.12-slim
 
-RUN pip install --no-cache-dir voidaccess opensquat uvicorn &&     apt-get update && apt-get install -y --no-install-recommends tor ca-certificates &&     rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir voidaccess opensquat &&     python -m spacy download en_core_web_sm &&     apt-get update && apt-get install -y --no-install-recommends tor ca-certificates &&     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /connector /usr/local/bin/connector
 

@@ -61,6 +61,7 @@ func (c *VoidAccessClient) Investigate(ctx context.Context, query string) (*Void
 		"investigate", query,
 		"--output", outputDir,
 		"--no-tor",
+		"--no-llm",
 		"--format", "json",
 	}
 
