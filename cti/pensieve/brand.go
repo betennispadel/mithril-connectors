@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,6 +22,33 @@ func runBrandProtection(ctx context.Context, cfg *PensieveConfig, target string,
 	runOpenPhish(ctx, target, em)
 	runTyposquat(ctx, target, em)
 	runOpenSquat(ctx, cfg, target, em)
+}
+
+// preDownloadFeed downloads a URL using Go's net/http (which handles proxy auth
+// correctly for CONNECT tunnels) and saves it to dst. Returns nil on success.
+// This works around Python requests failing 407 on HTTPS CONNECT through the
+// egress proxy.
+func preDownloadFeed(ctx context.Context, feedURL, dst string) error {
+	req, err := http.NewRequestWithContext(ctx, "GET", feedURL, nil)
+	if err != nil {
+		return err
+	}
+	client := &http.Client{Timeout: 120 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("download %s: %w", feedURL, err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("download %s: HTTP %d", feedURL, resp.StatusCode)
+	}
+	f, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	_, err = io.Copy(f, resp.Body)
+	return err
 }
 
 // runOpenSquat calls the opensquat Python tool for advanced domain squatting detection.
@@ -43,6 +72,24 @@ func runOpenSquat(ctx context.Context, cfg *PensieveConfig, target string, em *e
 		return
 	}
 	defer os.RemoveAll(workDir)
+
+	// Pre-download the NRD feed using Go's HTTP client. Go's net/http handles
+	// proxy auth (HTTPS_PROXY with userinfo) correctly for CONNECT tunnels,
+	// whereas Python requests/urllib3 often sends 407 in this setup.
+	feedURL := "https://feeds.opensquat.com/opensquat-nrd-latest.txt"
+	feedFile := filepath.Join(workDir, "opensquat-nrd-latest.txt")
+	fmt.Fprintf(os.Stderr, "opensquat: pre-downloading NRD feed via Go HTTP client\n")
+	if err := preDownloadFeed(ctx, feedURL, feedFile); err != nil {
+		fmt.Fprintf(os.Stderr, "opensquat: feed pre-download failed: %v\n", err)
+		// Continue anyway — opensquat will try its own download (may also fail)
+	} else {
+		// Write matching MD5 so opensquat's check_latest_feeds() finds the file fresh
+		data, _ := os.ReadFile(feedFile)
+		h := md5.Sum(data)
+		md5File := feedFile + ".md5"
+		os.WriteFile(md5File, []byte(hex.EncodeToString(h[:])), 0644)
+		fmt.Fprintf(os.Stderr, "opensquat: NRD feed ready (%d bytes)\n", len(data))
+	}
 
 	keywordsFile := filepath.Join(workDir, "keywords.txt")
 	if err := os.WriteFile(keywordsFile, []byte(strings.Join(keywords, "\n")), 0644); err != nil {

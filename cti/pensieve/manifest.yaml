@@ -5,7 +5,7 @@ image: connector-pensieve:1.0.0
 author: custom
 pricingTier: [free]
 shortDescription: Unified CTI engine — dark web, data leaks, IOC feeds, brand protection, fraud intelligence
-description: Comprehensive threat intelligence powered by VoidAccess + LeakRadar + 10 specialized sources. Supports 16 target types including domain, IP, email, username, crypto wallet, and threat actor tracking.
+description: Comprehensive threat intelligence powered by VoidAccess + LeakRadar + 10 specialized sources. Deep dark web investigation with entity extraction, relationship mapping, and enrichment from 20+ intelligence feeds.
 agentTool: true
 capabilities:
   - name: vulnerabilities
@@ -72,11 +72,89 @@ capabilities:
           type: string
           title: VirusTotal API Key
           format: password
+          description: "Enables: IP/domain/hash/URL reputation + malware analysis"
+        abuseIpdbApiKey:
+          type: string
+          title: AbuseIPDB API Key
+          format: password
+          description: "Enables: IP abuse/reputation scoring"
+        greynoiseApiKey:
+          type: string
+          title: GreyNoise API Key
+          format: password
+          description: "Enables: IP noise/threat context"
+        securityTrailsApiKey:
+          type: string
+          title: SecurityTrails API Key
+          format: password
+          description: "Enables: DNS history, WHOIS, subdomain enumeration"
+        otxApiKey:
+          type: string
+          title: AlienVault OTX API Key
+          format: password
+          description: "Enables: IOC pulse feeds, threat indicators"
+        urlscanApiKey:
+          type: string
+          title: URLScan.io API Key
+          format: password
+          description: "Enables: URL scanning and screenshot capture"
+        hybridAnalysisApiKey:
+          type: string
+          title: Hybrid Analysis API Key
+          format: password
+          description: "Enables: Malware sandbox analysis"
+        nvdApiKey:
+          type: string
+          title: NIST NVD API Key
+          format: password
+          description: "Enables: CVE detail enrichment with CVSS scores"
+        githubToken:
+          type: string
+          title: GitHub Token
+          format: password
+          description: "Enables: Code leak and secret exposure search"
+        etherscanApiKey:
+          type: string
+          title: Etherscan API Key
+          format: password
+          description: "Enables: Ethereum blockchain transaction analysis"
+        blockCypherToken:
+          type: string
+          title: BlockCypher Token
+          format: password
+          description: "Enables: Bitcoin blockchain analytics"
+        emailRepApiKey:
+          type: string
+          title: EmailRep API Key
+          format: password
+          description: "Enables: Email reputation scoring"
+        xposedOrNotApiKey:
+          type: string
+          title: XposedOrNot API Key
+          format: password
+          description: "Enables: Additional breach/exposure checks"
+        scrapingAntApiKey:
+          type: string
+          title: ScrapingAnt API Key
+          format: password
+          description: "Enables: Web scraping proxy for harder-to-reach sources"
+        scanDepth:
+          type: string
+          title: Scan Depth
+          enum: [shallow, normal, deep]
+          default: deep
+          description: "shallow=15 pages, normal=25, deep=40 onion pages"
+        scanPace:
+          type: string
+          title: Scan Pace
+          enum: [quiet, normal, aggressive]
+          default: normal
+          description: "quiet=polite delays, normal=balanced, aggressive=fast but noisy"
         maxFindings:
           type: integer
           title: Max Findings
           default: 1000
 resourceDefaults:
-  cpu: "1"
-  memory: 1Gi
-  timeoutSeconds: 1800
+  cpu: "2"
+  memory: 2Gi
+  timeoutSeconds: 3600
