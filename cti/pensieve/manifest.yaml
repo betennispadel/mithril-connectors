@@ -3,218 +3,238 @@ slug: pensieve
 version: 1.0.0
 image: connector-pensieve:1.0.0
 author: custom
-pricingTier: [free]
-shortDescription: Unified CTI engine — dark web, data leaks, IOC feeds, brand protection, fraud intelligence
-description: Comprehensive threat intelligence powered by VoidAccess + LeakRadar + 10 specialized sources. Deep dark web investigation with entity extraction, relationship mapping, and enrichment from 20+ intelligence feeds.
+pricingTier:
+- free
+shortDescription: Unified CTI engine — dark web, data leaks, IOC feeds, brand protection,
+  fraud intelligence
+description: Comprehensive threat intelligence powered by VoidAccess + LeakRadar +
+  10 specialized sources. Deep dark web investigation with entity extraction, relationship
+  mapping, and enrichment from 20+ intelligence feeds.
 agentTool: true
 capabilities:
-  - name: vulnerabilities
-    targetTypes: [domain]
-    inputs: [host]
-    produces: [vulnerability]
-    inputsSchema:
-      type: object
-      required: [target, ctiTargetType]
-      properties:
-        target:
-          type: string
-          title: Target Value
-          description: The value to investigate (domain, email, IP, keyword, etc.)
-        ctiTargetType:
-          type: string
-          title: CTI Target Type
-          description: Type of the target being investigated
-          enum:
-            - DOMAIN
-            - IP
-            - URL
-            - ONION
-            - EMAIL
-            - USERNAME
-            - PHONE
-            - FILE_HASH
-            - CRYPTO_WALLET
-            - ASN
-            - THREAT_ACTOR
-            - ORGANIZATION
-            - CVE
-            - KEYWORD
-            - TELEGRAM_CHANNEL
-            - APP_PACKAGE
-    configSchema:
-      type: object
-      properties:
-        leakRadarApiKey:
-          type: string
-          title: LeakRadar API Key
-          format: password
-          description: "Enables: credential leak search, combolist detection, dark web mentions"
-        hudsonRockApiKey:
-          type: string
-          title: Hudson Rock API Key
-          format: password
-          description: "Enables: infostealer log search (Cavalier engine)"
-        twitterBearerToken:
-          type: string
-          title: Twitter Bearer Token
-          format: password
-          description: "Enables: Twitter/X threat actor monitoring, brand mention search"
-        hasDataApiKey:
-          type: string
-          title: HasData API Key
-          format: password
-          description: "Enables: SERP scraping for public mentions and exposure"
-        newsDataApiKey:
-          type: string
-          title: NewsData.io API Key
-          format: password
-          description: "Enables: news article search for brand/threat mentions"
-        openSanctionsApiKey:
-          type: string
-          title: OpenSanctions API Key
-          format: password
-          description: "Enables: OFAC, EU, UN sanctions screening + PEP checks"
-        virusTotalKey:
-          type: string
-          title: VirusTotal API Key
-          format: password
-          description: "Enables: IP/domain/hash/URL reputation + malware analysis"
-        abuseIpdbApiKey:
-          type: string
-          title: AbuseIPDB API Key
-          format: password
-          description: "Enables: IP abuse/reputation scoring"
-        greynoiseApiKey:
-          type: string
-          title: GreyNoise API Key
-          format: password
-          description: "Enables: IP noise/threat context (mass scanners vs targeted)"
-        securityTrailsApiKey:
-          type: string
-          title: SecurityTrails API Key
-          format: password
-          description: "Enables: DNS history, WHOIS, subdomain enumeration"
-        otxApiKey:
-          type: string
-          title: AlienVault OTX API Key
-          format: password
-          description: "Enables: IOC pulse feeds, threat indicators"
-        urlscanApiKey:
-          type: string
-          title: URLScan.io API Key
-          format: password
-          description: "Enables: URL scanning and screenshot capture"
-        hybridAnalysisApiKey:
-          type: string
-          title: Hybrid Analysis API Key
-          format: password
-          description: "Enables: malware sandbox analysis (Falcon Sandbox)"
-        nvdApiKey:
-          type: string
-          title: NIST NVD API Key
-          format: password
-          description: "Enables: CVE detail enrichment with CVSS scores"
-        githubToken:
-          type: string
-          title: GitHub Token
-          format: password
-          description: "Enables: code leak and secret exposure search on GitHub"
-        gitlabToken:
-          type: string
-          title: GitLab Token
-          format: password
-          description: "Enables: code leak and secret exposure search on GitLab"
-        etherscanApiKey:
-          type: string
-          title: Etherscan API Key
-          format: password
-          description: "Enables: Ethereum blockchain transaction analysis"
-        blockCypherToken:
-          type: string
-          title: BlockCypher Token
-          format: password
-          description: "Enables: Bitcoin blockchain analytics"
-        emailRepApiKey:
-          type: string
-          title: EmailRep API Key
-          format: password
-          description: "Enables: email reputation scoring (deliverability, fraud risk)"
-        hibpApiKey:
-          type: string
-          title: Have I Been Pwned API Key
-          format: password
-          description: "Enables: breach/exposure lookup for emails and domains"
-        shodanApiKey:
-          type: string
-          title: Shodan API Key
-          format: password
-          description: "Enables: internet-wide device/service discovery and exposure"
-        xposedOrNotApiKey:
-          type: string
-          title: XposedOrNot API Key
-          format: password
-          description: "Enables: additional breach/exposure checks"
-        deeplApiKey:
-          type: string
-          title: DeepL API Key
-          format: password
-          description: "Enables: auto-translation of foreign-language dark web content"
-        darkSearchApiKey:
-          type: string
-          title: DarkSearch API Key
-          format: password
-          description: "Enables: indexed dark web search engine queries"
-        scrapingAntApiKey:
-          type: string
-          title: ScrapingAnt API Key
-          format: password
-          description: "Enables: web scraping proxy for harder-to-reach clearnet sources"
-        scrapingAntProxyUsername:
-          type: string
-          title: ScrapingAnt Proxy Username
-          format: password
-          description: "Residential proxy transport username (from scrapingant.com)"
-        scrapingAntProxyPassword:
-          type: string
-          title: ScrapingAnt Proxy Password
-          format: password
-          description: "Residential proxy transport password (from scrapingant.com)"
-        telegramApiId:
-          type: string
-          title: Telegram API ID
-          description: "Integer app ID from my.telegram.org — enables Telegram channel monitoring"
-        telegramApiHash:
-          type: string
-          title: Telegram API Hash
-          format: password
-          description: "App hash from my.telegram.org — required together with API ID"
-        telegramChannels:
-          type: string
-          title: Telegram Channels
-          description: "Comma-separated channel list to monitor (e.g. @vxunderground,@ransomwatch,@exploitbroker)"
-        openRouterApiKey:
-          type: string
-          title: OpenRouter API Key
-          format: password
-          description: "Enables: AI query refinement, relevance filtering, and intelligence summary generation"
-        scanDepth:
-          type: string
-          title: Scan Depth
-          enum: [shallow, normal, deep]
-          default: deep
-          description: "shallow=15 pages, normal=25, deep=40 onion pages crawled"
-        scanPace:
-          type: string
-          title: Scan Pace
-          enum: [quiet, normal, aggressive]
-          default: normal
-          description: "quiet=polite delays, normal=balanced, aggressive=fast but noisy"
-        maxFindings:
-          type: integer
-          title: Max Findings
-          default: 1000
-          description: "Maximum number of findings to emit per scan"
+- name: vulnerabilities
+  targetTypes:
+  - domain
+  inputs:
+  - host
+  produces:
+  - vulnerability
+  inputsSchema:
+    type: object
+    required:
+    - target
+    - ctiTargetType
+    properties:
+      target:
+        type: string
+        title: Target Value
+        description: The value to investigate (domain, email, IP, keyword, etc.)
+      ctiTargetType:
+        type: string
+        title: CTI Target Type
+        description: Type of the target being investigated
+        enum:
+        - DOMAIN
+        - IP
+        - URL
+        - ONION
+        - EMAIL
+        - USERNAME
+        - PHONE
+        - FILE_HASH
+        - CRYPTO_WALLET
+        - ASN
+        - THREAT_ACTOR
+        - ORGANIZATION
+        - CVE
+        - KEYWORD
+        - TELEGRAM_CHANNEL
+        - APP_PACKAGE
+  configSchema:
+    type: object
+    properties:
+      leakRadarApiKey:
+        type: string
+        title: LeakRadar API Key
+        format: password
+        description: 'Enables: credential leak search, combolist detection, dark web
+          mentions'
+      hudsonRockApiKey:
+        type: string
+        title: Hudson Rock API Key
+        format: password
+        description: 'Enables: infostealer log search (Cavalier engine)'
+      twitterBearerToken:
+        type: string
+        title: Twitter Bearer Token
+        format: password
+        description: 'Enables: Twitter/X threat actor monitoring, brand mention search'
+      hasDataApiKey:
+        type: string
+        title: HasData API Key
+        format: password
+        description: 'Enables: SERP scraping for public mentions and exposure'
+      newsDataApiKey:
+        type: string
+        title: NewsData.io API Key
+        format: password
+        description: 'Enables: news article search for brand/threat mentions'
+      openSanctionsApiKey:
+        type: string
+        title: OpenSanctions API Key
+        format: password
+        description: 'Enables: OFAC, EU, UN sanctions screening + PEP checks'
+      virusTotalKey:
+        type: string
+        title: VirusTotal API Key
+        format: password
+        description: 'Enables: IP/domain/hash/URL reputation + malware analysis'
+      abuseIpdbApiKey:
+        type: string
+        title: AbuseIPDB API Key
+        format: password
+        description: 'Enables: IP abuse/reputation scoring'
+      greynoiseApiKey:
+        type: string
+        title: GreyNoise API Key
+        format: password
+        description: 'Enables: IP noise/threat context (mass scanners vs targeted)'
+      securityTrailsApiKey:
+        type: string
+        title: SecurityTrails API Key
+        format: password
+        description: 'Enables: DNS history, WHOIS, subdomain enumeration'
+      otxApiKey:
+        type: string
+        title: AlienVault OTX API Key
+        format: password
+        description: 'Enables: IOC pulse feeds, threat indicators'
+      urlscanApiKey:
+        type: string
+        title: URLScan.io API Key
+        format: password
+        description: 'Enables: URL scanning and screenshot capture'
+      hybridAnalysisApiKey:
+        type: string
+        title: Hybrid Analysis API Key
+        format: password
+        description: 'Enables: malware sandbox analysis (Falcon Sandbox)'
+      nvdApiKey:
+        type: string
+        title: NIST NVD API Key
+        format: password
+        description: 'Enables: CVE detail enrichment with CVSS scores'
+      githubToken:
+        type: string
+        title: GitHub Token
+        format: password
+        description: 'Enables: code leak and secret exposure search on GitHub'
+      gitlabToken:
+        type: string
+        title: GitLab Token
+        format: password
+        description: 'Enables: code leak and secret exposure search on GitLab'
+      etherscanApiKey:
+        type: string
+        title: Etherscan API Key
+        format: password
+        description: 'Enables: Ethereum blockchain transaction analysis'
+      blockCypherToken:
+        type: string
+        title: BlockCypher Token
+        format: password
+        description: 'Enables: Bitcoin blockchain analytics'
+      emailRepApiKey:
+        type: string
+        title: EmailRep API Key
+        format: password
+        description: 'Enables: email reputation scoring (deliverability, fraud risk)'
+      hibpApiKey:
+        type: string
+        title: Have I Been Pwned API Key
+        format: password
+        description: 'Enables: breach/exposure lookup for emails and domains'
+      shodanApiKey:
+        type: string
+        title: Shodan API Key
+        format: password
+        description: 'Enables: internet-wide device/service discovery and exposure'
+      xposedOrNotApiKey:
+        type: string
+        title: XposedOrNot API Key
+        format: password
+        description: 'Enables: additional breach/exposure checks'
+      deeplApiKey:
+        type: string
+        title: DeepL API Key
+        format: password
+        description: 'Enables: auto-translation of foreign-language dark web content'
+      darkSearchApiKey:
+        type: string
+        title: DarkSearch API Key
+        format: password
+        description: 'Enables: indexed dark web search engine queries'
+      scrapingAntApiKey:
+        type: string
+        title: ScrapingAnt API Key
+        format: password
+        description: 'Enables: web scraping proxy for harder-to-reach clearnet sources'
+      scrapingAntProxyUsername:
+        type: string
+        title: ScrapingAnt Proxy Username
+        format: password
+        description: Residential proxy transport username (from scrapingant.com)
+      scrapingAntProxyPassword:
+        type: string
+        title: ScrapingAnt Proxy Password
+        format: password
+        description: Residential proxy transport password (from scrapingant.com)
+      telegramApiId:
+        type: string
+        title: Telegram API ID
+        description: Integer app ID from my.telegram.org — enables Telegram channel
+          monitoring
+      telegramApiHash:
+        type: string
+        title: Telegram API Hash
+        format: password
+        description: App hash from my.telegram.org — required together with API ID
+      telegramChannels:
+        type: string
+        title: Telegram Channels
+        description: Select which Telegram channels to monitor. All defaults are active
+          when empty.
+        ui:widget: telegram-channels
+      openRouterApiKey:
+        type: string
+        title: OpenRouter API Key
+        format: password
+        description: 'Enables: AI query refinement, relevance filtering, and intelligence
+          summary generation'
+      scanDepth:
+        type: string
+        title: Scan Depth
+        enum:
+        - shallow
+        - normal
+        - deep
+        default: deep
+        description: shallow=15 pages, normal=25, deep=40 onion pages crawled
+      scanPace:
+        type: string
+        title: Scan Pace
+        enum:
+        - quiet
+        - normal
+        - aggressive
+        default: normal
+        description: quiet=polite delays, normal=balanced, aggressive=fast but noisy
+      maxFindings:
+        type: integer
+        title: Max Findings
+        default: 1000
+        description: Maximum number of findings to emit per scan
 resourceDefaults:
-  cpu: "2"
+  cpu: '2'
   memory: 2Gi
   timeoutSeconds: 3600
