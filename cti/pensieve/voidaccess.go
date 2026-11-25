@@ -103,12 +103,16 @@ func (c *VoidAccessClient) Investigate(ctx context.Context, query string, cfg *P
 	args := []string{
 		"investigate", query,
 		"--output", outputDir,
-		"--no-llm",
 		"--format", "json",
 		"--depth", depth,
 		"--pace", pace,
 		"--events-jsonl", eventsFile,
 		"--quiet",
+	}
+	// Only skip LLM if no OpenRouter key is configured
+	if cfg.OpenRouterApiKey == "" {
+		// Insert --no-llm after "investigate" and query
+		args = append(args[:4], append([]string{"--no-llm"}, args[4:]...)...)
 	}
 
 	cmd := exec.CommandContext(ctx, "voidaccess", args...)

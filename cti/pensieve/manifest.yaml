@@ -48,26 +48,32 @@ capabilities:
           type: string
           title: LeakRadar API Key
           format: password
+          description: "Enables: credential leak search, combolist detection, dark web mentions"
         hudsonRockApiKey:
           type: string
           title: Hudson Rock API Key
           format: password
+          description: "Enables: infostealer log search (Cavalier engine)"
         twitterBearerToken:
           type: string
           title: Twitter Bearer Token
           format: password
+          description: "Enables: Twitter/X threat actor monitoring, brand mention search"
         hasDataApiKey:
           type: string
           title: HasData API Key
           format: password
+          description: "Enables: SERP scraping for public mentions and exposure"
         newsDataApiKey:
           type: string
           title: NewsData.io API Key
           format: password
+          description: "Enables: news article search for brand/threat mentions"
         openSanctionsApiKey:
           type: string
           title: OpenSanctions API Key
           format: password
+          description: "Enables: OFAC, EU, UN sanctions screening + PEP checks"
         virusTotalKey:
           type: string
           title: VirusTotal API Key
@@ -82,7 +88,7 @@ capabilities:
           type: string
           title: GreyNoise API Key
           format: password
-          description: "Enables: IP noise/threat context"
+          description: "Enables: IP noise/threat context (mass scanners vs targeted)"
         securityTrailsApiKey:
           type: string
           title: SecurityTrails API Key
@@ -102,7 +108,7 @@ capabilities:
           type: string
           title: Hybrid Analysis API Key
           format: password
-          description: "Enables: Malware sandbox analysis"
+          description: "Enables: malware sandbox analysis (Falcon Sandbox)"
         nvdApiKey:
           type: string
           title: NIST NVD API Key
@@ -112,7 +118,12 @@ capabilities:
           type: string
           title: GitHub Token
           format: password
-          description: "Enables: Code leak and secret exposure search"
+          description: "Enables: code leak and secret exposure search on GitHub"
+        gitlabToken:
+          type: string
+          title: GitLab Token
+          format: password
+          description: "Enables: code leak and secret exposure search on GitLab"
         etherscanApiKey:
           type: string
           title: Etherscan API Key
@@ -127,23 +138,71 @@ capabilities:
           type: string
           title: EmailRep API Key
           format: password
-          description: "Enables: Email reputation scoring"
+          description: "Enables: email reputation scoring (deliverability, fraud risk)"
+        hibpApiKey:
+          type: string
+          title: Have I Been Pwned API Key
+          format: password
+          description: "Enables: breach/exposure lookup for emails and domains"
+        shodanApiKey:
+          type: string
+          title: Shodan API Key
+          format: password
+          description: "Enables: internet-wide device/service discovery and exposure"
         xposedOrNotApiKey:
           type: string
           title: XposedOrNot API Key
           format: password
-          description: "Enables: Additional breach/exposure checks"
+          description: "Enables: additional breach/exposure checks"
+        deeplApiKey:
+          type: string
+          title: DeepL API Key
+          format: password
+          description: "Enables: auto-translation of foreign-language dark web content"
+        darkSearchApiKey:
+          type: string
+          title: DarkSearch API Key
+          format: password
+          description: "Enables: indexed dark web search engine queries"
         scrapingAntApiKey:
           type: string
           title: ScrapingAnt API Key
           format: password
-          description: "Enables: Web scraping proxy for harder-to-reach sources"
+          description: "Enables: web scraping proxy for harder-to-reach clearnet sources"
+        scrapingAntProxyUsername:
+          type: string
+          title: ScrapingAnt Proxy Username
+          format: password
+          description: "Residential proxy transport username (from scrapingant.com)"
+        scrapingAntProxyPassword:
+          type: string
+          title: ScrapingAnt Proxy Password
+          format: password
+          description: "Residential proxy transport password (from scrapingant.com)"
+        telegramApiId:
+          type: string
+          title: Telegram API ID
+          description: "Integer app ID from my.telegram.org — enables Telegram channel monitoring"
+        telegramApiHash:
+          type: string
+          title: Telegram API Hash
+          format: password
+          description: "App hash from my.telegram.org — required together with API ID"
+        telegramChannels:
+          type: string
+          title: Telegram Channels
+          description: "Comma-separated channel list to monitor (e.g. @vxunderground,@ransomwatch,@exploitbroker)"
+        openRouterApiKey:
+          type: string
+          title: OpenRouter API Key
+          format: password
+          description: "Enables: AI query refinement, relevance filtering, and intelligence summary generation"
         scanDepth:
           type: string
           title: Scan Depth
           enum: [shallow, normal, deep]
           default: deep
-          description: "shallow=15 pages, normal=25, deep=40 onion pages"
+          description: "shallow=15 pages, normal=25, deep=40 onion pages crawled"
         scanPace:
           type: string
           title: Scan Pace
@@ -154,6 +213,7 @@ capabilities:
           type: integer
           title: Max Findings
           default: 1000
+          description: "Maximum number of findings to emit per scan"
 resourceDefaults:
   cpu: "2"
   memory: 2Gi
