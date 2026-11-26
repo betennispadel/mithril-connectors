@@ -126,6 +126,16 @@ type PensieveConfig struct {
 	// --- Scan settings ---
 	ScanDepth string `json:"scanDepth"`
 	ScanPace  string `json:"scanPace"`
+
+	// --- LLM model override ---
+	LlmModel string `json:"llmModel"`
+
+	// --- Extended config fields ---
+	MaxmindLicenseKey      string `json:"maxmindLicenseKey"`
+	GitlabScrapingEnabled  bool   `json:"gitlabScrapingEnabled"`
+	BlockchainExplorerUrls string `json:"blockchainExplorerUrls"`
+	DnsProviders           string `json:"dnsProviders"`
+	FastModeEnabled        bool   `json:"fastModeEnabled"`
 }
 
 // GetTelegramChannels returns the configured channels or the built-in defaults.
@@ -146,24 +156,25 @@ func (c *PensieveConfig) VoidAccessEnvVars() []string {
 		}
 	}
 
-	// Enrichment keys (must match voidaccess_cli/config.py ENRICHMENT_KEYS)
-	add("VT_API_KEY", c.VirusTotalKey)
+	// Enrichment keys — mapped to VoidAccess FastAPI env var names
+	add("VIRUSTOTAL_API_KEY", c.VirusTotalKey)
 	add("ABUSEIPDB_API_KEY", c.AbuseIPDBApiKey)
 	add("GREYNOISE_API_KEY", c.GreyNoiseApiKey)
 	add("SECURITYTRAILS_API_KEY", c.SecurityTrailsApiKey)
 	add("OTX_API_KEY", c.OTXApiKey)
 	add("URLSCAN_API_KEY", c.URLScanApiKey)
-	add("HYBRID_ANALYSIS_API_KEY", c.HybridAnalysisApiKey)
+	add("HYBRIDANALYSIS_API_KEY", c.HybridAnalysisApiKey)
 	add("GITHUB_TOKEN", c.GithubToken)
 	add("GITLAB_TOKEN", c.GitlabToken)
 	add("ETHERSCAN_API_KEY", c.EtherscanApiKey)
 	add("BLOCKCYPHER_TOKEN", c.BlockCypherToken)
 	add("EMAILREP_API_KEY", c.EmailRepApiKey)
-	add("HIBP_API_KEY", c.HIBPApiKey)
+	add("HAVE_I_BEEN_PWNED_API_KEY", c.HIBPApiKey)
 	add("SHODAN_API_KEY", c.ShodanApiKey)
 	add("XPOSEDORNOT_API_KEY", c.XposedOrNotApiKey)
 	add("DEEPL_API_KEY", c.DeeplApiKey)
 	add("DARKSEARCH_API_KEY", c.DarkSearchApiKey)
+	add("NVD_API_KEY", c.NVDApiKey)
 
 	// ScrapingAnt clearnet proxy
 	add("SCRAPINGANT_API_KEY", c.ScrapingAntApiKey)
@@ -175,10 +186,56 @@ func (c *PensieveConfig) VoidAccessEnvVars() []string {
 	add("TELEGRAM_API_HASH", c.TelegramApiHash)
 	add("TELEGRAM_CHANNELS", c.GetTelegramChannels())
 
-	// LLM — enables query refinement, relevance filtering, AI summary
-	add("OPENROUTER_API_KEY", c.OpenRouterApiKey)
+	// LLM — VoidAccess uses LLM_PROVIDER + LLM_API_KEY (not OPENROUTER_API_KEY)
+	if c.OpenRouterApiKey != "" {
+		add("LLM_PROVIDER", "openrouter")
+		add("LLM_API_KEY", c.OpenRouterApiKey)
+		add("LLM_MODEL", c.GetLLMModel())
+	}
+
+	// Sidecar-specific vars
+	add("TOR_PROXY_HOST", "127.0.0.1")
+	add("TOR_PROXY_PORT", "9050")
+	add("GITHUB_SCRAPING_ENABLED", boolStr(c.GithubToken != ""))
+	add("PASTE_SCRAPING_ENABLED", "true")
+	add("RSS_FEEDS_ENABLED", "true")
+	add("JWT_SECRET_KEY", "pensieve-sidecar-internal-2026")
+
+	// Extended config env vars
+	add("MAXMIND_LICENSE_KEY", c.MaxmindLicenseKey)
+	add("GITLAB_SCRAPING_ENABLED", boolStr(c.GitlabScrapingEnabled))
+	add("BLOCKCHAIN_EXPLORER_URLS", c.BlockchainExplorerUrls)
+	add("DNS_PROVIDERS", c.DnsProviders)
+	add("PLAYWRIGHT_HEADLESS_MODE", "true")
+	add("PLAYWRIGHT_TIMEOUT_MS", "30000")
+	add("FAST_MODE_ENABLED", boolStr(c.FastModeEnabled))
+	add("PROGRESS_EVENTS_ENABLED", "true")
+	add("EMBEDDINGS_ENABLED", "false")
+	add("IP_REPUTATION_ENABLED", "true")
+	add("DOMAIN_REPUTATION_ENABLED", "true")
+	add("HASH_REPUTATION_ENABLED", "true")
+	add("EMAIL_REPUTATION_ENABLED", "true")
+	add("TOR_MAX_RETRIES", "3")
+	add("TOR_CIRCUIT_ROTATION_ENABLED", "true")
+	add("PHASE_TIMEOUT_SECONDS", "300")
+	add("RECOVERY_ENABLED", "true")
 
 	return pairs
+}
+
+// GetLLMModel returns the configured LLM model or the default.
+func (c *PensieveConfig) GetLLMModel() string {
+	if c.LlmModel != "" {
+		return c.LlmModel
+	}
+	return "openrouter/deepseek/deepseek-chat"
+}
+
+func boolStr(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
 }
 
 func loadConfig(ctx context.Context) *PensieveConfig {

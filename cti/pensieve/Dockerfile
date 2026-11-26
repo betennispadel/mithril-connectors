@@ -16,10 +16,14 @@ RUN CGO_ENABLED=0 go build -o /connector .
 # ── Runtime ────────────────────────────────────────────────────────────────────
 FROM python:3.12-slim
 
-RUN pip install --no-cache-dir voidaccess opensquat telethon "httpx[socks]" &&     python -m spacy download en_core_web_sm &&     apt-get update && apt-get install -y --no-install-recommends tor ca-certificates &&     rm -rf /var/lib/apt/lists/*
+# Install VoidAccess with API mode (FastAPI + uvicorn) + other dependencies
+RUN pip install --no-cache-dir "voidaccess[api]" opensquat telethon "httpx[socks]" && \
+    python -m spacy download en_core_web_sm && \
+    apt-get update && apt-get install -y --no-install-recommends \
+      tor ca-certificates postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
 
-# Patch aiohttp to honor HTTP_PROXY env vars (connector network is internal-only,
-# all egress goes through the worker's authenticated proxy).
+# Patch aiohttp to honor HTTP_PROXY env vars
 COPY cti/pensieve/sitecustomize.py /usr/local/lib/python3.12/site-packages/sitecustomize.py
 
 COPY --from=builder /connector /usr/local/bin/connector

@@ -12,20 +12,19 @@ import (
 	"github.com/betennispadel/mithril-connectors/sdk/connector"
 )
 
-var telegramChannels = []string{
-	"vxunderground",
-	"breachdetector",
-	"kelvinsecteam",
-	"leakbase",
-	"ransomwarenews",
-	"darkwebinformer",
-}
-
 func runTelegram(ctx context.Context, cfg *PensieveConfig, target string, em *emitter) {
 	client := &http.Client{Timeout: 30 * time.Second}
 	keyword := strings.ToLower(target)
 
-	for _, channel := range telegramChannels {
+	// Use configured channels (custom or defaults from config.go)
+	channelCSV := cfg.GetTelegramChannels()
+	channels := strings.Split(channelCSV, ",")
+
+	for _, channel := range channels {
+		channel = strings.TrimSpace(channel)
+		if channel == "" {
+			continue
+		}
 		select {
 		case <-ctx.Done():
 			return

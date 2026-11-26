@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync"
 
 	"github.com/betennispadel/mithril-connectors/sdk/connector"
@@ -26,19 +27,22 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	targetType := strInput(inputs, "ctiTargetType")
 	em := newEmitter(ctx, out, cfg.MaxFindings)
 
-	// VoidAccess CLI client for dark web intelligence
+	// VoidAccess FastAPI sidecar for dark web intelligence
 	va := newVoidAccessClient()
 	defer va.Stop()
+
+	// Start the VoidAccess sidecar (Tor + FastAPI)
+	if err := va.Start(ctx, cfg); err != nil {
+		fmt.Fprintln(os.Stderr, "pensieve: VoidAccess sidecar start failed:", err)
+	}
 
 	var wg sync.WaitGroup
 
 	// Route to sub-adapters based on target type
 	switch targetType {
 	case "DOMAIN":
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		if cfg.LeakRadarApiKey != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runLeakRadarDomain(ctx, cfg, target, em) }()
@@ -49,10 +53,8 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runIOCDomain(ctx, cfg, target, em) }()
 
 	case "IP":
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		wg.Add(1)
 		go func() { defer wg.Done(); runIOCIP(ctx, cfg, target, em) }()
 
@@ -65,26 +67,20 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 			wg.Add(1)
 			go func() { defer wg.Done(); runHudsonRock(ctx, cfg, target, em) }()
 		}
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 
 	case "USERNAME":
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		if cfg.LeakRadarApiKey != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runLeakRadarUsername(ctx, cfg, target, em) }()
 		}
 
 	case "KEYWORD":
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		if cfg.TwitterBearerToken != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, em) }()
@@ -101,10 +97,8 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		}
 
 	case "CRYPTO_WALLET":
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		wg.Add(1)
 		go func() { defer wg.Done(); runCrypto(ctx, cfg, target, em) }()
 
@@ -113,56 +107,42 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 			wg.Add(1)
 			go func() { defer wg.Done(); runSanctions(ctx, cfg, target, em) }()
 		}
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 
 	case "THREAT_ACTOR":
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		wg.Add(1)
 		go func() { defer wg.Done(); runRansomware(ctx, cfg, target, em) }()
 
 	case "FILE_HASH":
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		wg.Add(1)
 		go func() { defer wg.Done(); runIOCHash(ctx, cfg, target, em) }()
 
 	case "CVE":
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 
 	case "TELEGRAM_CHANNEL":
 		wg.Add(1)
 		go func() { defer wg.Done(); runTelegram(ctx, cfg, target, em) }()
 
 	case "URL", "ONION":
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		wg.Add(1)
 		go func() { defer wg.Done(); runBrandProtection(ctx, cfg, target, em) }()
 
 	case "PHONE":
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 
 	case "ASN":
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 
 	case "APP_PACKAGE":
 		if cfg.LeakRadarApiKey != "" {
@@ -171,11 +151,8 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		}
 
 	default:
-		// Fallback: at least try VoidAccess darkweb
-		if true {
-			wg.Add(1)
-			go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		}
+		wg.Add(1)
+		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 	}
 
 	wg.Wait()

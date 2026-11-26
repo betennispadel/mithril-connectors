@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -10,23 +11,23 @@ import (
 )
 
 func runDarkweb(ctx context.Context, va *VoidAccessClient, cfg *PensieveConfig, target string, em *emitter) {
-	inv, err := va.Investigate(ctx, target, cfg)
+	result, err := va.Investigate(ctx, target, cfg)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "VoidAccess darkweb error: %v\n", err)
 		return
 	}
 
+	inv := &result.Investigation
+
 	// Build entity ID → entity map for relationship resolution
-	entityByID := make(map[string]VoidAccessEntity, len(inv.Entities))
-	for _, e := range inv.Entities {
+	entityByID := make(map[string]VoidAccessEntity, len(result.Entities))
+	for _, e := range result.Entities {
 		entityByID[e.ID] = e
 	}
 
 	// Build entity ID → community map
-	communityOf := inv.Communities
-
 	// Emit entities as findings — with full detail
-	for _, entity := range inv.Entities {
+	for _, entity := range result.Entities {
 		if entity.Suppressed {
 			continue
 		}
@@ -51,20 +52,13 @@ func runDarkweb(ctx context.Context, va *VoidAccessClient, cfg *PensieveConfig, 
 		}
 		tags = append(tags, entity.Tags...)
 
-		// Build detailed name
 		name := buildEntityName(entityType, entity)
-
-		// Build rich description
 		desc := buildEntityDescription(entity, inv)
 
-		// Build references from source URL and related pages
 		var refs []string
 		if entity.SourceURL != "" {
 			refs = append(refs, entity.SourceURL)
 		}
-
-		// Build metadata with all available enrichment data
-		metadata := buildEntityMetadata(entity, entityByID, inv, communityOf)
 
 		if !em.emit(connector.Finding{
 			Name:        name,
@@ -78,12 +72,10 @@ func runDarkweb(ctx context.Context, va *VoidAccessClient, cfg *PensieveConfig, 
 			return
 		}
 
-		// Emit metadata as a separate enrichment finding if entity has rich context
-		if entity.ContextSnippet != "" || len(metadata) > 2 {
+		// Emit enrichment finding if entity has rich context
+		if entity.ContextSnippet != "" {
 			metaDesc := fmt.Sprintf("Enrichment data for %s '%s'.", entityType, entity.Value)
-			if entity.ContextSnippet != "" {
-				metaDesc += fmt.Sprintf("\n\nContext: %s", entity.ContextSnippet)
-			}
+			metaDesc += fmt.Sprintf("\n\nContext: %s", entity.ContextSnippet)
 
 			metaTags := []string{"pensieve", "enrichment", category, entityType}
 			if !em.emit(connector.Finding{
@@ -101,7 +93,7 @@ func runDarkweb(ctx context.Context, va *VoidAccessClient, cfg *PensieveConfig, 
 	}
 
 	// Emit relationships as findings
-	for _, rel := range inv.Relationships {
+	for _, rel := range result.Relationships {
 		src, srcOk := entityByID[rel.SourceID]
 		tgt, tgtOk := entityByID[rel.TargetID]
 		if !srcOk || !tgtOk {
@@ -148,15 +140,14 @@ func runDarkweb(ctx context.Context, va *VoidAccessClient, cfg *PensieveConfig, 
 		}
 	}
 
-	// Emit investigation summary as a finding
+	// Emit investigation summary
 	if inv.Summary != "" {
-		summaryTags := []string{"pensieve", "summary", "darkweb"}
 		if !em.emit(connector.Finding{
 			Name:        fmt.Sprintf("Investigation Summary: %s", truncate(inv.Query, 40)),
 			Severity:    "info",
 			Description: inv.Summary,
 			MatchedAt:   inv.Query,
-			Tags:        summaryTags,
+			Tags:        []string{"pensieve", "summary", "darkweb"},
 			References:  []string{},
 			Fingerprint: fingerprint("pensieve", "summary", inv.ID),
 		}) {
@@ -164,8 +155,8 @@ func runDarkweb(ctx context.Context, va *VoidAccessClient, cfg *PensieveConfig, 
 		}
 	}
 
-	// Emit notable pages as findings (sources where intelligence was found)
-	for _, page := range inv.PagesScraped {
+	// Emit notable pages as findings
+	for _, page := range result.Pages {
 		if page.URL == "" {
 			continue
 		}
@@ -191,26 +182,39 @@ func runDarkweb(ctx context.Context, va *VoidAccessClient, cfg *PensieveConfig, 
 			return
 		}
 	}
+
+	// ── Emit structured result as special finding ──
+	// This carries the full VoidAccess output (entities, relationships, graph,
+	// communities, investigation metadata) so the backend can write directly
+	// to cti_assets, cti_asset_relations, cti_investigations, cti_pages
+	// without regex re-extraction.
+	structuredJSON, err := json.Marshal(result)
+	if err == nil {
+		em.emit(connector.Finding{
+			Name:        "__pensieve_structured_result__",
+			Severity:    "info",
+			Description: string(structuredJSON),
+			MatchedAt:   inv.Query,
+			Tags:        []string{"__structured__", "pensieve"},
+			References:  []string{},
+			Fingerprint: fingerprint("pensieve", "structured", inv.ID),
+		})
+	}
 }
 
 func classifyEntitySeverity(e VoidAccessEntity) string {
-	// Use priority score if available
-	if e.PriorityScore > 0 {
-		if e.PriorityScore >= 80 {
-			return "critical"
-		}
-		if e.PriorityScore >= 60 {
-			return "high"
-		}
-		if e.PriorityScore >= 40 {
-			return "medium"
-		}
-		if e.PriorityScore >= 20 {
-			return "low"
-		}
+	if e.PriorityScore >= 80 {
+		return "critical"
 	}
-
-	// Fall back to threat score
+	if e.PriorityScore >= 60 {
+		return "high"
+	}
+	if e.PriorityScore >= 40 {
+		return "medium"
+	}
+	if e.PriorityScore >= 20 {
+		return "low"
+	}
 	if e.ThreatScore >= 80 {
 		return "critical"
 	}
@@ -223,24 +227,19 @@ func classifyEntitySeverity(e VoidAccessEntity) string {
 	if e.ThreatScore >= 20 {
 		return "low"
 	}
-
-	// High signal entities are at least medium
 	if e.HighSignal {
 		return "medium"
 	}
-
-	// Cross-referenced entities are at least low
 	if e.CrossReferenced {
 		return "low"
 	}
-
 	return "info"
 }
 
 func normalizeEntityType(t string) string {
 	t = strings.ToUpper(strings.TrimSpace(t))
 	switch t {
-	case "IP_ADDRESS", "IP":
+	case "IP_ADDRESS", "IP", "IPV4", "IPV6":
 		return "IP"
 	case "DOMAIN", "DOMAIN_NAME":
 		return "DOMAIN"
@@ -250,7 +249,7 @@ func normalizeEntityType(t string) string {
 		return "CVE"
 	case "MALWARE", "MALWARE_FAMILY":
 		return "MALWARE"
-	case "THREAT_ACTOR", "THREAT_ACTOR_HANDLE":
+	case "THREAT_ACTOR", "THREAT_ACTOR_HANDLE", "ACTOR_ALIAS":
 		return "THREAT_ACTOR"
 	case "RANSOMWARE_GROUP":
 		return "RANSOMWARE_GROUP"
@@ -260,10 +259,12 @@ func normalizeEntityType(t string) string {
 		return "ORGANIZATION"
 	case "URL":
 		return "URL"
-	case "FILE_HASH", "HASH":
+	case "FILE_HASH", "HASH", "HASH_MD5", "HASH_SHA1", "HASH_SHA256", "HASH_SHA512":
 		return "FILE_HASH"
-	case "CRYPTOCURRENCY_ADDRESS", "CRYPTO_WALLET":
+	case "CRYPTOCURRENCY_ADDRESS", "CRYPTO_WALLET", "BTC_ADDRESS", "ETH_ADDRESS", "MONERO_ADDRESS":
 		return "CRYPTO_WALLET"
+	case "TELEGRAM_USERNAME":
+		return "TELEGRAM_CHANNEL"
 	default:
 		if t == "" {
 			return "UNKNOWN"
@@ -329,11 +330,9 @@ func buildEntityDescription(e VoidAccessEntity, inv *VoidAccessInvestigation) st
 	entityType := normalizeEntityType(e.Type)
 	parts := []string{}
 
-	// Core info
 	parts = append(parts, fmt.Sprintf("Entity '%s' (type: %s) discovered via dark web intelligence investigation for '%s'.",
 		e.Value, entityType, inv.Query))
 
-	// Confidence and source
 	if e.Confidence > 0 {
 		parts = append(parts, fmt.Sprintf("Confidence: %.0f%%.", e.Confidence*100))
 	}
@@ -346,15 +345,11 @@ func buildEntityDescription(e VoidAccessEntity, inv *VoidAccessInvestigation) st
 	if e.SourceURL != "" {
 		parts = append(parts, fmt.Sprintf("Source: %s.", e.SourceURL))
 	}
-
-	// Context snippet (the most valuable detail)
 	if e.ContextSnippet != "" {
 		parts = append(parts, fmt.Sprintf("\n\nContext: \"%s\"", e.ContextSnippet))
 	}
-
-	// Priority info
 	if e.HighSignal {
-		parts = append(parts, "⚠ HIGH SIGNAL entity.")
+		parts = append(parts, "HIGH SIGNAL entity.")
 	}
 	if e.CrossReferenced {
 		parts = append(parts, fmt.Sprintf("Cross-referenced across %d investigations.", e.InvestigationCount))
@@ -364,42 +359,4 @@ func buildEntityDescription(e VoidAccessEntity, inv *VoidAccessInvestigation) st
 	}
 
 	return strings.Join(parts, " ")
-}
-
-func buildEntityMetadata(e VoidAccessEntity, entityByID map[string]VoidAccessEntity, inv *VoidAccessInvestigation, communityOf map[string]int) map[string]any {
-	meta := map[string]any{
-		"entityType":       normalizeEntityType(e.Type),
-		"confidence":       e.Confidence,
-		"sourceCount":      e.SourceCount,
-		"extractionMethod": e.ExtractionMethod,
-		"sourceURL":        e.SourceURL,
-		"sourceQuality":    e.SourceQuality,
-		"priorityScore":    e.PriorityScore,
-		"highSignal":       e.HighSignal,
-		"crossReferenced":  e.CrossReferenced,
-		"firstSeen":        e.FirstSeen,
-		"lastSeen":         e.LastSeen,
-	}
-
-	if e.ContextSnippet != "" {
-		meta["contextSnippet"] = e.ContextSnippet
-	}
-	if e.CanonicalValue != "" && e.CanonicalValue != e.Value {
-		meta["canonicalValue"] = e.CanonicalValue
-	}
-	if e.FreshnessTag != "" {
-		meta["freshnessTag"] = e.FreshnessTag
-	}
-	if communityOf != nil {
-		if cid, ok := communityOf[e.ID]; ok {
-			meta["communityId"] = cid
-		}
-	}
-
-	// Include existing metadata
-	for k, v := range e.Metadata {
-		meta[k] = v
-	}
-
-	return meta
 }
