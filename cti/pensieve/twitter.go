@@ -34,17 +34,14 @@ type twitterResult struct {
 
 func runTwitter(ctx context.Context, cfg *PensieveConfig, target string, targetType string, em *emitter) {
 	// Requires at least one Twitter account credential
-	if cfg.TwitterUsername == "" {
+	if cfg.TwitterCt0 == "" {
 		return
 	}
 
 	// Build env for the Python scraper
 	env := append(os.Environ(),
-		"TWITTER_USERNAME="+cfg.TwitterUsername,
-		"TWITTER_PASSWORD="+cfg.TwitterPassword,
-		"TWITTER_EMAIL="+cfg.TwitterEmail,
-		"TWITTER_EMAIL_PASSWORD="+cfg.TwitterEmailPassword,
-		"TWSCRAPE_DB=/tmp/twscrape.db",
+		"TWITTER_CT0="+cfg.TwitterCt0,
+		"TWITTER_AUTH_TOKEN="+cfg.TwitterAuthToken,
 	)
 
 	args := []string{

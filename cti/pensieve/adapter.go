@@ -51,7 +51,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runBrandProtection(ctx, cfg, target, em) }()
 		wg.Add(1)
 		go func() { defer wg.Done(); runIOCDomain(ctx, cfg, target, em) }()
-		if cfg.TwitterUsername != "" {
+		if cfg.TwitterCt0 != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
@@ -89,7 +89,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 			wg.Add(1)
 			go func() { defer wg.Done(); runLeakRadarUsername(ctx, cfg, target, em) }()
 		}
-		if cfg.TwitterUsername != "" {
+		if cfg.TwitterCt0 != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
@@ -101,7 +101,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "KEYWORD":
 		wg.Add(1)
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		if cfg.TwitterUsername != "" {
+		if cfg.TwitterCt0 != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
@@ -119,7 +119,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		wg.Add(1)
 		go func() { defer wg.Done(); runCrypto(ctx, cfg, target, em) }()
-		if cfg.TwitterUsername != "" {
+		if cfg.TwitterCt0 != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
@@ -131,7 +131,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		}
 		wg.Add(1)
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		if cfg.TwitterUsername != "" {
+		if cfg.TwitterCt0 != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
@@ -149,7 +149,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		wg.Add(1)
 		go func() { defer wg.Done(); runRansomware(ctx, cfg, target, em) }()
-		if cfg.TwitterUsername != "" {
+		if cfg.TwitterCt0 != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
@@ -171,7 +171,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "CVE":
 		wg.Add(1)
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		if cfg.TwitterUsername != "" {
+		if cfg.TwitterCt0 != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
@@ -207,7 +207,7 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 			wg.Add(1)
 			go func() { defer wg.Done(); runLeakRadarApp(ctx, cfg, target, em) }()
 		}
-		if cfg.TwitterUsername != "" {
+		if cfg.TwitterCt0 != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}

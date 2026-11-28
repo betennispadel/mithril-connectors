@@ -84,10 +84,8 @@ type PensieveConfig struct {
 	// --- Our own adapter keys ---
 	LeakRadarApiKey     string `json:"leakRadarApiKey"`
 	HudsonRockApiKey    string `json:"hudsonRockApiKey"`
-	TwitterUsername      string `json:"twitterUsername"`
-	TwitterPassword      string `json:"twitterPassword"`
-	TwitterEmail         string `json:"twitterEmail"`
-	TwitterEmailPassword string `json:"twitterEmailPassword"`
+	TwitterCt0       string `json:"twitterCt0"`
+	TwitterAuthToken string `json:"twitterAuthToken"`
 	HasDataApiKey       string `json:"hasDataApiKey"`
 	NewsDataApiKey      string `json:"newsDataApiKey"`
 	OpenSanctionsApiKey string `json:"openSanctionsApiKey"`
@@ -191,11 +189,9 @@ func (c *PensieveConfig) VoidAccessEnvVars() []string {
 	add("TELEGRAM_PHONE", c.TelegramPhone)
 	add("TELEGRAM_CHANNELS", c.GetTelegramChannels())
 
-	// Twitter (twscrape session-based)
-	add("TWITTER_USERNAME", c.TwitterUsername)
-	add("TWITTER_PASSWORD", c.TwitterPassword)
-	add("TWITTER_EMAIL", c.TwitterEmail)
-	add("TWITTER_EMAIL_PASSWORD", c.TwitterEmailPassword)
+	// Twitter session cookies
+	add("TWITTER_CT0", c.TwitterCt0)
+	add("TWITTER_AUTH_TOKEN", c.TwitterAuthToken)
 
 	// LLM — VoidAccess uses LLM_PROVIDER + LLM_API_KEY (not OPENROUTER_API_KEY)
 	if c.OpenRouterApiKey != "" {

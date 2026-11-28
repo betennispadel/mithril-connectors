@@ -17,7 +17,7 @@ RUN CGO_ENABLED=0 go build -o /connector .
 FROM python:3.12-slim
 
 # Install VoidAccess with API mode (FastAPI + uvicorn) + other dependencies
-RUN pip install --no-cache-dir "voidaccess[api]" opensquat telethon "httpx[socks]" twscrape && \
+RUN pip install --no-cache-dir "voidaccess[api]" opensquat telethon "httpx[socks]" && \
     python -m spacy download en_core_web_sm && \
     apt-get update && apt-get install -y --no-install-recommends \
       tor ca-certificates postgresql-client && \
