@@ -167,20 +167,20 @@ func (c *PensieveConfig) VoidAccessEnvVars() []string {
 	}
 
 	// Enrichment keys — mapped to VoidAccess FastAPI env var names
-	add("VIRUSTOTAL_API_KEY", c.VirusTotalKey)
+	add("VT_API_KEY", c.VirusTotalKey)
 	add("ABUSEIPDB_API_KEY", c.AbuseIPDBApiKey)
 	add("GREYNOISE_API_KEY", c.GreyNoiseApiKey)
 	add("SECURITYTRAILS_API_KEY", c.SecurityTrailsApiKey)
 	add("OTX_API_KEY", c.OTXApiKey)
 	add("ABUSECH_API_KEY", c.AbusechApiKey)
 	add("URLSCAN_API_KEY", c.URLScanApiKey)
-	add("HYBRIDANALYSIS_API_KEY", c.HybridAnalysisApiKey)
+	add("HYBRID_ANALYSIS_API_KEY", c.HybridAnalysisApiKey)
 	add("GITHUB_TOKEN", c.GithubToken)
 	add("GITLAB_TOKEN", c.GitlabToken)
 	add("ETHERSCAN_API_KEY", c.EtherscanApiKey)
 	add("BLOCKCYPHER_TOKEN", c.BlockCypherToken)
 	add("EMAILREP_API_KEY", c.EmailRepApiKey)
-	add("HAVE_I_BEEN_PWNED_API_KEY", c.HIBPApiKey)
+	add("HIBP_API_KEY", c.HIBPApiKey)
 	add("SHODAN_API_KEY", c.ShodanApiKey)
 	add("XPOSEDORNOT_API_KEY", c.XposedOrNotApiKey)
 	add("DEEPL_API_KEY", c.DeeplApiKey)
