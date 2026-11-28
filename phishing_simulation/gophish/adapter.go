@@ -215,6 +215,9 @@ func resolveTemplate(cfg *Config) emailTemplate {
 }
 
 func resolveLandingPage(cfg *Config) landingPage {
+	if strings.TrimSpace(cfg.CustomLandingHTML) != "" {
+		return landingPage{HTML: cfg.CustomLandingHTML}
+	}
 	if lp, ok := landingPages[cfg.LandingPreset]; ok {
 		return lp
 	}

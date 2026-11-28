@@ -22,6 +22,7 @@ type Config struct {
 	CaptureCredentials bool   `json:"captureCredentials"`
 	CapturePasswords   bool   `json:"capturePasswords"`
 	RedirectURL        string `json:"redirectURL"`
+	CustomLandingHTML   string `json:"customLandingHTML"`
 
 	CampaignDurationMinutes int `json:"campaignDurationMinutes"`
 	PollIntervalSeconds     int `json:"pollIntervalSeconds"`
