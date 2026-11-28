@@ -49,8 +49,6 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		}
 		wg.Add(1)
 		go func() { defer wg.Done(); runBrandProtection(ctx, cfg, target, em) }()
-		wg.Add(1)
-		go func() { defer wg.Done(); runIOCDomain(ctx, cfg, target, em) }()
 		if cfg.TwitterCt0 != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
@@ -67,17 +65,11 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "IP":
 		wg.Add(1)
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		wg.Add(1)
-		go func() { defer wg.Done(); runIOCIP(ctx, cfg, target, em) }()
 
 	case "EMAIL":
 		if cfg.LeakRadarApiKey != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runLeakRadarEmail(ctx, cfg, target, em) }()
-		}
-		if cfg.HudsonRockApiKey != "" {
-			wg.Add(1)
-			go func() { defer wg.Done(); runHudsonRock(ctx, cfg, target, em) }()
 		}
 		wg.Add(1)
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
@@ -165,8 +157,6 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "FILE_HASH":
 		wg.Add(1)
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		wg.Add(1)
-		go func() { defer wg.Done(); runIOCHash(ctx, cfg, target, em) }()
 
 	case "CVE":
 		wg.Add(1)

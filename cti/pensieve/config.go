@@ -83,13 +83,21 @@ var defaultTelegramChannels = []string{
 type PensieveConfig struct {
 	// --- Our own adapter keys ---
 	LeakRadarApiKey     string `json:"leakRadarApiKey"`
-	HudsonRockApiKey    string `json:"hudsonRockApiKey"`
 	TwitterCt0       string `json:"twitterCt0"`
 	TwitterAuthToken string `json:"twitterAuthToken"`
 	HasDataApiKey       string `json:"hasDataApiKey"`
 	NewsDataApiKey      string `json:"newsDataApiKey"`
 	OpenSanctionsApiKey string `json:"openSanctionsApiKey"`
 	MaxFindings         int    `json:"maxFindings"`
+
+	// --- VoidAccess threat feed keys ---
+	AbusechApiKey string `json:"abusechApiKey"`
+
+	// --- Internationalization ---
+	I18nLanguages string `json:"i18nLanguages"`
+
+	// --- DNS enrichment ---
+	DnsEnrichmentEnabled bool `json:"dnsEnrichmentEnabled"`
 
 	// --- VoidAccess enrichment keys ---
 	VirusTotalKey        string `json:"virusTotalKey"`
@@ -164,6 +172,7 @@ func (c *PensieveConfig) VoidAccessEnvVars() []string {
 	add("GREYNOISE_API_KEY", c.GreyNoiseApiKey)
 	add("SECURITYTRAILS_API_KEY", c.SecurityTrailsApiKey)
 	add("OTX_API_KEY", c.OTXApiKey)
+	add("ABUSECH_API_KEY", c.AbusechApiKey)
 	add("URLSCAN_API_KEY", c.URLScanApiKey)
 	add("HYBRIDANALYSIS_API_KEY", c.HybridAnalysisApiKey)
 	add("GITHUB_TOKEN", c.GithubToken)
@@ -201,6 +210,8 @@ func (c *PensieveConfig) VoidAccessEnvVars() []string {
 	}
 
 	// Sidecar-specific vars
+	add("I18N_LANGUAGES", c.GetI18nLanguages())
+	add("DNS_ENRICHMENT_ENABLED", boolStr(c.DnsEnrichmentEnabled))
 	add("TOR_PROXY_HOST", "127.0.0.1")
 	add("TOR_PROXY_PORT", "9050")
 	add("GITHUB_SCRAPING_ENABLED", boolStr(c.GithubToken != ""))
@@ -228,6 +239,14 @@ func (c *PensieveConfig) VoidAccessEnvVars() []string {
 	add("RECOVERY_ENABLED", "true")
 
 	return pairs
+}
+
+// GetI18nLanguages returns the configured languages or the default set.
+func (c *PensieveConfig) GetI18nLanguages() string {
+	if c.I18nLanguages != "" {
+		return c.I18nLanguages
+	}
+	return "en,ru,zh,ar,es,de,fr,pt"
 }
 
 // GetLLMModel returns the configured LLM model or the default.
@@ -258,6 +277,10 @@ func loadConfig(ctx context.Context) *PensieveConfig {
 	}
 	if cfg.ScanPace == "" {
 		cfg.ScanPace = "normal"
+	}
+	// DNS enrichment enabled by default
+	if !cfg.DnsEnrichmentEnabled {
+		cfg.DnsEnrichmentEnabled = true
 	}
 	return cfg
 }
