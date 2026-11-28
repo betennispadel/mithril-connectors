@@ -118,6 +118,7 @@ type PensieveConfig struct {
 	// --- Telegram integration ---
 	TelegramApiId    string `json:"telegramApiId"`
 	TelegramApiHash  string `json:"telegramApiHash"`
+	TelegramPhone    string `json:"telegramPhone"`
 	TelegramChannels string `json:"telegramChannels"`
 
 	// --- VoidAccess LLM (enables query refinement + AI summary) ---
@@ -184,6 +185,7 @@ func (c *PensieveConfig) VoidAccessEnvVars() []string {
 	// Telegram — use defaults if no custom channels configured
 	add("TELEGRAM_API_ID", c.TelegramApiId)
 	add("TELEGRAM_API_HASH", c.TelegramApiHash)
+	add("TELEGRAM_PHONE", c.TelegramPhone)
 	add("TELEGRAM_CHANNELS", c.GetTelegramChannels())
 
 	// LLM — VoidAccess uses LLM_PROVIDER + LLM_API_KEY (not OPENROUTER_API_KEY)

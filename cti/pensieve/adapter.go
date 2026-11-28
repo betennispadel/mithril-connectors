@@ -85,8 +85,6 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 			wg.Add(1)
 			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, em) }()
 		}
-		wg.Add(1)
-		go func() { defer wg.Done(); runTelegram(ctx, cfg, target, em) }()
 		if cfg.HasDataApiKey != "" {
 			wg.Add(1)
 			go func() { defer wg.Done(); runHasData(ctx, cfg, target, em) }()
@@ -127,8 +125,6 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 
 	case "TELEGRAM_CHANNEL":
-		wg.Add(1)
-		go func() { defer wg.Done(); runTelegram(ctx, cfg, target, em) }()
 
 	case "URL", "ONION":
 		wg.Add(1)
