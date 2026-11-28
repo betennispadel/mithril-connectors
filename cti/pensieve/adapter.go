@@ -51,17 +51,17 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runBrandProtection(ctx, cfg, target, em) }()
 		wg.Add(1)
 		go func() { defer wg.Done(); runIOCDomain(ctx, cfg, target, em) }()
-		if cfg.TwitterBearerToken != "" {
+		if cfg.TwitterUsername != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.HasDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runHasData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runHasData(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.NewsDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, targetType, em) }()
 		}
 
 	case "IP":
@@ -89,29 +89,29 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 			wg.Add(1)
 			go func() { defer wg.Done(); runLeakRadarUsername(ctx, cfg, target, em) }()
 		}
-		if cfg.TwitterBearerToken != "" {
+		if cfg.TwitterUsername != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.HasDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runHasData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runHasData(ctx, cfg, target, targetType, em) }()
 		}
 
 	case "KEYWORD":
 		wg.Add(1)
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		if cfg.TwitterBearerToken != "" {
+		if cfg.TwitterUsername != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.HasDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runHasData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runHasData(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.NewsDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, targetType, em) }()
 		}
 
 	case "CRYPTO_WALLET":
@@ -119,9 +119,9 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		wg.Add(1)
 		go func() { defer wg.Done(); runCrypto(ctx, cfg, target, em) }()
-		if cfg.TwitterBearerToken != "" {
+		if cfg.TwitterUsername != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
 
 	case "ORGANIZATION":
@@ -131,17 +131,17 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		}
 		wg.Add(1)
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		if cfg.TwitterBearerToken != "" {
+		if cfg.TwitterUsername != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.HasDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runHasData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runHasData(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.NewsDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, targetType, em) }()
 		}
 
 	case "THREAT_ACTOR":
@@ -149,17 +149,17 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
 		wg.Add(1)
 		go func() { defer wg.Done(); runRansomware(ctx, cfg, target, em) }()
-		if cfg.TwitterBearerToken != "" {
+		if cfg.TwitterUsername != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.HasDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runHasData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runHasData(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.NewsDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, targetType, em) }()
 		}
 
 	case "FILE_HASH":
@@ -171,17 +171,17 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 	case "CVE":
 		wg.Add(1)
 		go func() { defer wg.Done(); runDarkweb(ctx, va, cfg, target, em) }()
-		if cfg.TwitterBearerToken != "" {
+		if cfg.TwitterUsername != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.HasDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runHasData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runHasData(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.NewsDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, targetType, em) }()
 		}
 
 	case "TELEGRAM_CHANNEL":
@@ -207,17 +207,17 @@ func (PensieveAdapter) Execute(ctx context.Context, inputs map[string]any, out c
 			wg.Add(1)
 			go func() { defer wg.Done(); runLeakRadarApp(ctx, cfg, target, em) }()
 		}
-		if cfg.TwitterBearerToken != "" {
+		if cfg.TwitterUsername != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runTwitter(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.HasDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runHasData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runHasData(ctx, cfg, target, targetType, em) }()
 		}
 		if cfg.NewsDataApiKey != "" {
 			wg.Add(1)
-			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, em) }()
+			go func() { defer wg.Done(); runNewsData(ctx, cfg, target, targetType, em) }()
 		}
 
 	default:

@@ -17,7 +17,7 @@ RUN CGO_ENABLED=0 go build -o /connector .
 FROM python:3.12-slim
 
 # Install VoidAccess with API mode (FastAPI + uvicorn) + other dependencies
-RUN pip install --no-cache-dir "voidaccess[api]" opensquat telethon "httpx[socks]" && \
+RUN pip install --no-cache-dir "voidaccess[api]" opensquat telethon "httpx[socks]" twscrape && \
     python -m spacy download en_core_web_sm && \
     apt-get update && apt-get install -y --no-install-recommends \
       tor ca-certificates postgresql-client && \
@@ -25,6 +25,10 @@ RUN pip install --no-cache-dir "voidaccess[api]" opensquat telethon "httpx[socks
 
 # Patch aiohttp to honor HTTP_PROXY env vars
 COPY cti/pensieve/sitecustomize.py /usr/local/lib/python3.12/site-packages/sitecustomize.py
+
+# Pensieve Python scripts (query expansion, Twitter scraper)
+COPY cti/pensieve/query_builder.py /usr/local/bin/query_builder.py
+COPY cti/pensieve/twitter_scraper.py /usr/local/bin/twitter_scraper.py
 
 COPY --from=builder /connector /usr/local/bin/connector
 
