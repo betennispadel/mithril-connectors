@@ -7,7 +7,7 @@ RUN cd vulnerabilities/wpscan && GOWORK=off go mod download
 COPY sdk/ sdk/
 COPY vulnerabilities/wpscan/ vulnerabilities/wpscan/
 RUN cd vulnerabilities/wpscan && CGO_ENABLED=0 GOWORK=off go build -trimpath -o /out/connector .
-FROM wpscanteam/wpscan:v4.2.0 AS runtime
+FROM wpscanteam/wpscan:v4.2.1 AS runtime
 # ponytail: final stage is the tool image itself — wpscan is a Ruby gem at
 # /usr/local/bundle/bin/wpscan and needs the ruby runtime + gems at runtime.
 # Non-root: the upstream image ships a `wpscan` user (uid 1000, home /wpscan,
